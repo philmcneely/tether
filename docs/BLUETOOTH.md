@@ -3757,3 +3757,17 @@ The BR/EDR-only advice in `--bt-status` now names another adapter when one is pr
 
 Not verified: whether the dongle's firmware loaded (`rtl_bt/rtl8761bu_fw.bin`), and whether `hci0`
 produces a P-256 key and a dual bond for the reporter.
+
+### 2026-10-25 - The iPhone does not report deletes over MAP (#272)
+
+Asked to remove messages deleted on the phone. Not possible on a live session:
+
+- The inbox listing is a recent window, not the mailbox. With `MaxCount` 200 it returned 10
+  messages covering ~16 hours while the journal held 150 going back weeks. A message missing from
+  a listing says nothing about whether the phone still has it.
+- A message deleted on the iPhone stayed in the listing of the same MAP session for 80 s and more
+  (4 re-lists, handle unchanged).
+
+Inferring deletes from absence was tried and reverted. Treating a short listing as the whole folder
+removed 128 messages that were still on the phone, and the journal rewrite made that permanent.
+Whether a new MAP session drops the deleted message is unverified.
