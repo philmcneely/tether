@@ -529,6 +529,16 @@ codes still reach the vault. Their popup is shown only when it carries a code or
 a short code or sender ID, and offers no reply. Answered with `bt_status` and `bt_threads`
 broadcasts; reported as `hide_unknown_senders` in `bt_status`.
 
+#### `bt_remove_thread` (Client -> Daemon, broadcast)
+**Payload**: `{"command": "bt_remove_thread", "thread": "tel:+15035550101", "before": 1792951200}`
+Local to this computer and display only: nothing is deleted from the phone or the journal.
+`bt_threads` and `bt_messages` leave out the thread's messages timestamped at or before
+`before`, and no popup is shown for them unless it carries a code. Send the thread's
+`timestamp` from `bt_threads`, so a message arriving meanwhile stays visible; anything newer
+brings the thread back. Every spelling of a number shares one entry, and repeats keep the
+later cutoff. Persisted under the retention mode, memory only under `none`. Both fields are
+required. Answered with a `bt_threads` broadcast.
+
 #### `bt_list_messages` (Client -> Daemon, answered directly)
 **Payload**: `{"command": "bt_list_messages", "thread": "tel:+15035550101"}`
 **Response**: `{"command": "bt_messages", "thread": ..., "messages": [...]}` with `handle`,

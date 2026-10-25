@@ -24,6 +24,7 @@
 #include "tether/bluetooth/diagnostics.hpp"
 #include "tether/bluetooth/monitor.hpp"
 #include "tether/bluetooth/pairing.hpp"
+#include "tether/bluetooth/removed_threads.hpp"
 #include "tether/client.hpp"
 #include "tether/crypto.hpp"
 #include "tether/discovery.hpp"
@@ -780,7 +781,9 @@ namespace tether {
         const bool hide_unknown = bluetooth::load_config().hide_unknown_senders;
         {
             std::lock_guard<std::mutex> lock(bluetooth::message_store_mutex());
-            for (const auto& thread : bluetooth::message_store().threads()) {
+            const auto& removed = bluetooth::removed_threads();
+            const auto visible = [&removed](const bluetooth::Message& m) { return !removed.hides(m); };
+            for (const auto& thread : bluetooth::message_store().threads(visible)) {
                 if (hide_unknown && bluetooth::contact_store().is_unknown_sender(thread.key, thread.replied))
                     continue;
                 auto entry = bluetooth::to_json(thread);
@@ -829,7 +832,9 @@ namespace tether {
         {
             std::lock_guard<std::mutex> lock(bluetooth::message_store_mutex());
             const std::string name = bluetooth::contact_store().name_for(thread_key);
-            for (const auto& message : bluetooth::message_store().messages(thread_key)) {
+            const auto& removed = bluetooth::removed_threads();
+            const auto visible = [&removed](const bluetooth::Message& m) { return !removed.hides(m); };
+            for (const auto& message : bluetooth::message_store().messages(thread_key, 200, visible)) {
                 auto entry = bluetooth::to_json(message);
                 if (!name.empty() && !message.outgoing)
                     entry["name"] = name;
@@ -1397,6 +1402,23 @@ namespace tether {
                             handles.push_back(j["handle"].get<std::string>());
                         }
                         bluetooth::mark_messages_read_async(std::move(handles), j.value("read", true));
+                    } else if (j.contains("command") && j["command"] == "bt_remove_thread") {
+                        // `before` is the newest timestamp the user saw, so a message
+                        // arriving meanwhile stays visible. Nothing is deleted.
+                        const bool valid = j.contains("thread") && j["thread"].is_string() &&
+                                           !j["thread"].get<std::string>().empty() && j.contains("before") &&
+                                           j["before"].is_number_integer();
+                        if (valid) {
+                            {
+                                std::lock_guard<std::mutex> lock(bluetooth::message_store_mutex());
+                                bluetooth::removed_threads().remove(j["thread"].get<std::string>(),
+                                                                    j["before"].get<int64_t>());
+                                bluetooth::save_removed_threads(bluetooth::removed_threads());
+                            }
+                            broadcast_local_event(build_bt_threads().dump());
+                        } else {
+                            debug::log(WARN, "bt_remove_thread: needs a thread and an integer before");
+                        }
                     } else if (j.contains("command") && j["command"] == "bt_send_message" && j.contains("thread") &&
                                j.contains("body")) {
                         send_bt_message_async(j["thread"].get<std::string>(),
@@ -1587,6 +1609,7 @@ namespace tether {
                                 for (auto mode : {Retention::Encrypted, Retention::Plaintext}) {
                                     std::filesystem::remove(bluetooth::journal_path(mode), ec);
                                     std::filesystem::remove(bluetooth::contacts_path(mode), ec);
+                                    std::filesystem::remove(bluetooth::removed_threads_path(mode), ec);
                                 }
                             } else {
                                 bluetooth::move_retained_store(previous, config.retention);

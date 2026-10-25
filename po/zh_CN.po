@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tether\n"
 "Report-Msgid-Bugs-To: zack@bartel.com\n"
-"POT-Creation-Date: 2026-10-24 20:22-0700\n"
+"POT-Creation-Date: 2026-10-25 10:20-0700\n"
 "PO-Revision-Date: 2026-08-23\n"
 "Last-Translator: Tether project\n"
 "Language-Team: Simplified Chinese\n"
@@ -2591,6 +2591,16 @@ msgstr "已发送"
 msgid "New Message"
 msgstr "新信息"
 
+#: src/gtk/messages_view.cpp src/tui/messages.cpp
+#, c-format
+msgid "Remove the conversation with %s?"
+msgstr "要移除与 %s 的会话吗？"
+
+#: src/gtk/messages_view.cpp src/tui/messages.cpp
+msgid ""
+"It stays on your iPhone, and comes back here when a new message arrives."
+msgstr "会话仍保留在 iPhone 上，收到新消息时会重新显示在这里。"
+
 #: src/gtk/messages_view.cpp
 msgid "Search conversations"
 msgstr "搜索会话"
@@ -2602,6 +2612,10 @@ msgstr "收件人："
 #: src/gtk/messages_view.cpp
 msgid "Phone number or email"
 msgstr "电话号码或电子邮件"
+
+#: src/gtk/messages_view.cpp
+msgid "Remove Conversation"
+msgstr "移除会话"
 
 #: src/gtk/messages_view.cpp
 msgid "Send"
@@ -2902,8 +2916,8 @@ msgid "New message, or dial on Calls"
 msgstr "新消息，在通话页中为拨号"
 
 #: src/tui/main.cpp
-msgid "Dismiss, forget, unpair, or hang up"
-msgstr "忽略、忘记、取消配对或挂断"
+msgid "Dismiss, forget, unpair, hang up, or remove a conversation"
+msgstr "忽略、忘记、取消配对、挂断或移除会话"
 
 #: src/tui/main.cpp
 msgid "Copy the highlighted address or text"

@@ -30,6 +30,7 @@ namespace tether::ui {
             GtkWidget* thread_list = nullptr;
             GtkWidget* conversation = nullptr;
             GtkWidget* conversation_header = nullptr;
+            GtkWidget* remove_button = nullptr;
             GtkWidget* conversation_scroll = nullptr;
             GtkWidget* composer = nullptr;
             GtkWidget* send_button = nullptr;
@@ -44,6 +45,7 @@ namespace tether::ui {
 
             std::string selected_thread;
             std::string selected_name;
+            int64_t selected_timestamp = 0;
             bool visible = false;
             bool map_open = false;
             bool threads_known = false;
@@ -204,6 +206,7 @@ namespace tether::ui {
             g_object_set_data_full(
                 G_OBJECT(row), "reply_reason", g_strdup(thread.value("reply_reason", "").c_str()), g_free);
             g_object_set_data(G_OBJECT(row), "group", GINT_TO_POINTER(thread.value("group", false) ? 1 : 0));
+            g_object_set_data_full(G_OBJECT(row), "timestamp", g_strdup(std::to_string(stamp).c_str()), g_free);
 
             GtkWidget* box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 8);
             gtk_container_set_border_width(GTK_CONTAINER(box), 10);
@@ -793,6 +796,8 @@ namespace tether::ui {
 
         void clear_selection() {
             switch_thread("");
+            gtk_widget_hide(g_messages.remove_button);
+            g_messages.selected_timestamp = 0;
             g_messages.selected_name.clear();
             g_messages.selected_repliable = false;
             g_messages.selected_block_reason.clear();
@@ -806,8 +811,11 @@ namespace tether::ui {
             const char* thread = (const char*)g_object_get_data(G_OBJECT(row), "thread");
             const char* name = (const char*)g_object_get_data(G_OBJECT(row), "name");
             const char* block_reason = (const char*)g_object_get_data(G_OBJECT(row), "reply_reason");
+            const char* stamp = (const char*)g_object_get_data(G_OBJECT(row), "timestamp");
 
             switch_thread(thread ? thread : "");
+            g_messages.selected_timestamp = stamp ? g_ascii_strtoll(stamp, nullptr, 10) : 0;
+            gtk_widget_set_visible(g_messages.remove_button, thread && *thread);
 
             g_messages.selected_name = name ? name : "";
             g_messages.selected_repliable = g_object_get_data(G_OBJECT(row), "repliable") != nullptr;
@@ -889,6 +897,7 @@ namespace tether::ui {
 
             g_messages.composing = true;
             g_messages.compose_requested_key.clear();
+            gtk_widget_hide(g_messages.remove_button);
             contact_completion_request();
 
             clear_list_box(g_messages.conversation);
@@ -939,6 +948,33 @@ namespace tether::ui {
         }
 
         void on_thread_activated(GtkListBox*, GtkListBoxRow*, gpointer) { focus_composer_soon(); }
+
+        void on_remove_thread_clicked(GtkWidget*, gpointer) {
+            if (g_messages.selected_thread.empty() || g_messages.composing)
+                return;
+            // Taken before the dialog runs: the list can refresh underneath it,
+            // and a message arriving meanwhile must stay visible.
+            const std::string thread = g_messages.selected_thread;
+            const int64_t before = g_messages.selected_timestamp;
+            const std::string name = g_messages.selected_name.empty() ? thread : g_messages.selected_name;
+
+            GtkWidget* dialog = gtk_message_dialog_new(GTK_WINDOW(main_window()),
+                                                       GTK_DIALOG_MODAL,
+                                                       GTK_MESSAGE_QUESTION,
+                                                       GTK_BUTTONS_OK_CANCEL,
+                                                       _("Remove the conversation with %s?"),
+                                                       name.c_str());
+            gtk_message_dialog_format_secondary_text(
+                GTK_MESSAGE_DIALOG(dialog),
+                "%s",
+                _("It stays on your iPhone, and comes back here when a new message arrives."));
+            const bool confirmed = gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK;
+            gtk_widget_destroy(dialog);
+            if (!confirmed)
+                return;
+
+            daemon_send({{"command", "bt_remove_thread"}, {"thread", thread}, {"before", before}});
+        }
 
     } // namespace
 
@@ -1175,6 +1211,13 @@ namespace tether::ui {
         gtk_label_set_xalign(GTK_LABEL(g_messages.conversation_header), 0.0);
         gtk_label_set_ellipsize(GTK_LABEL(g_messages.conversation_header), PANGO_ELLIPSIZE_END);
         gtk_box_pack_start(GTK_BOX(conversation_header_box), g_messages.conversation_header, TRUE, TRUE, 0);
+        g_messages.remove_button = gtk_button_new_from_icon_name("user-trash-symbolic", GTK_ICON_SIZE_BUTTON);
+        gtk_button_set_relief(GTK_BUTTON(g_messages.remove_button), GTK_RELIEF_NONE);
+        gtk_widget_set_tooltip_text(g_messages.remove_button, _("Remove Conversation"));
+        set_accessible_name(g_messages.remove_button, _("Remove Conversation"));
+        g_signal_connect(g_messages.remove_button, "clicked", G_CALLBACK(on_remove_thread_clicked), nullptr);
+        gtk_widget_set_no_show_all(g_messages.remove_button, TRUE);
+        gtk_box_pack_end(GTK_BOX(conversation_header_box), g_messages.remove_button, FALSE, FALSE, 0);
         gtk_box_pack_start(GTK_BOX(conversation_box), conversation_header_box, FALSE, FALSE, 0);
         gtk_box_pack_start(GTK_BOX(conversation_box), gtk_separator_new(GTK_ORIENTATION_HORIZONTAL), FALSE, FALSE, 0);
 

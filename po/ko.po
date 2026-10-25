@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tether\n"
 "Report-Msgid-Bugs-To: zack@bartel.com\n"
-"POT-Creation-Date: 2026-10-24 20:22-0700\n"
+"POT-Creation-Date: 2026-10-25 10:20-0700\n"
 "PO-Revision-Date: 2026-08-23\n"
 "Last-Translator: Tether project\n"
 "Language-Team: Korean\n"
@@ -2653,6 +2653,16 @@ msgstr "보냄"
 msgid "New Message"
 msgstr "새 메시지"
 
+#: src/gtk/messages_view.cpp src/tui/messages.cpp
+#, c-format
+msgid "Remove the conversation with %s?"
+msgstr "%s 님과의 대화를 목록에서 제거할까요?"
+
+#: src/gtk/messages_view.cpp src/tui/messages.cpp
+msgid ""
+"It stays on your iPhone, and comes back here when a new message arrives."
+msgstr "iPhone에는 그대로 남아 있으며, 새 메시지가 오면 여기에 다시 표시됩니다."
+
 #: src/gtk/messages_view.cpp
 msgid "Search conversations"
 msgstr "대화 검색"
@@ -2664,6 +2674,10 @@ msgstr "받는 사람:"
 #: src/gtk/messages_view.cpp
 msgid "Phone number or email"
 msgstr "전화번호 또는 이메일"
+
+#: src/gtk/messages_view.cpp
+msgid "Remove Conversation"
+msgstr "대화 제거"
 
 #: src/gtk/messages_view.cpp
 msgid "Send"
@@ -2840,7 +2854,9 @@ msgstr "알 수 없는 발신자의 메시지 숨기기"
 msgid ""
 "Threads from numbers not in your contacts are hidden. Codes still pop up and "
 "autofill."
-msgstr "연락처에 없는 번호와의 대화는 숨겨집니다. 코드는 계속 알림으로 표시되고 자동 입력됩니다."
+msgstr ""
+"연락처에 없는 번호와의 대화는 숨겨집니다. 코드는 계속 알림으로 표시되고 자동 "
+"입력됩니다."
 
 #: src/gtk/settings_view.cpp src/tui/settings.cpp
 msgid ""
@@ -2971,8 +2987,8 @@ msgid "New message, or dial on Calls"
 msgstr "새 메시지, 통화 탭에서는 전화 걸기"
 
 #: src/tui/main.cpp
-msgid "Dismiss, forget, unpair, or hang up"
-msgstr "닫기, 삭제, 페어링 해제 또는 끊기"
+msgid "Dismiss, forget, unpair, hang up, or remove a conversation"
+msgstr "닫기, 삭제, 페어링 해제, 끊기 또는 대화 제거"
 
 #: src/tui/main.cpp
 msgid "Copy the highlighted address or text"

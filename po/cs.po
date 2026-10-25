@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tether\n"
 "Report-Msgid-Bugs-To: zack@bartel.com\n"
-"POT-Creation-Date: 2026-10-24 20:22-0700\n"
+"POT-Creation-Date: 2026-10-25 10:20-0700\n"
 "PO-Revision-Date: 2026-08-23\n"
 "Last-Translator: Tether project\n"
 "Language-Team: Czech\n"
@@ -2691,6 +2691,16 @@ msgstr "Odesláno"
 msgid "New Message"
 msgstr "Nová zpráva"
 
+#: src/gtk/messages_view.cpp src/tui/messages.cpp
+#, c-format
+msgid "Remove the conversation with %s?"
+msgstr "Odebrat konverzaci s %s?"
+
+#: src/gtk/messages_view.cpp src/tui/messages.cpp
+msgid ""
+"It stays on your iPhone, and comes back here when a new message arrives."
+msgstr "Na iPhonu zůstane a vrátí se sem, jakmile přijde nová zpráva."
+
 #: src/gtk/messages_view.cpp
 msgid "Search conversations"
 msgstr "Hledat konverzace"
@@ -2702,6 +2712,10 @@ msgstr "Komu:"
 #: src/gtk/messages_view.cpp
 msgid "Phone number or email"
 msgstr "Telefonní číslo nebo e-mail"
+
+#: src/gtk/messages_view.cpp
+msgid "Remove Conversation"
+msgstr "Odebrat konverzaci"
 
 #: src/gtk/messages_view.cpp
 msgid "Send"
@@ -2878,7 +2892,9 @@ msgstr "Skrýt zprávy od neznámých odesílatelů"
 msgid ""
 "Threads from numbers not in your contacts are hidden. Codes still pop up and "
 "autofill."
-msgstr "Konverzace s čísly, která nemáte v kontaktech, jsou skryté. Kódy se stále zobrazí a vyplní automaticky."
+msgstr ""
+"Konverzace s čísly, která nemáte v kontaktech, jsou skryté. Kódy se stále "
+"zobrazí a vyplní automaticky."
 
 #: src/gtk/settings_view.cpp src/tui/settings.cpp
 msgid ""
@@ -3008,8 +3024,8 @@ msgid "New message, or dial on Calls"
 msgstr "Nová zpráva, na kartě Hovory vytočit číslo"
 
 #: src/tui/main.cpp
-msgid "Dismiss, forget, unpair, or hang up"
-msgstr "Zavřít, zapomenout, zrušit spárování nebo zavěsit"
+msgid "Dismiss, forget, unpair, hang up, or remove a conversation"
+msgstr "Zavřít, zapomenout, zrušit spárování, zavěsit nebo odebrat konverzaci"
 
 #: src/tui/main.cpp
 msgid "Copy the highlighted address or text"

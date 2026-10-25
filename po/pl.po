@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tether\n"
 "Report-Msgid-Bugs-To: zack@bartel.com\n"
-"POT-Creation-Date: 2026-10-24 20:22-0700\n"
+"POT-Creation-Date: 2026-10-25 10:20-0700\n"
 "PO-Revision-Date: 2026-08-23\n"
 "Last-Translator: Tether project\n"
 "Language-Team: Polish\n"
@@ -2718,6 +2718,16 @@ msgstr "Wysłano"
 msgid "New Message"
 msgstr "Nowa wiadomość"
 
+#: src/gtk/messages_view.cpp src/tui/messages.cpp
+#, c-format
+msgid "Remove the conversation with %s?"
+msgstr "Usunąć wątek z %s z listy?"
+
+#: src/gtk/messages_view.cpp src/tui/messages.cpp
+msgid ""
+"It stays on your iPhone, and comes back here when a new message arrives."
+msgstr "Pozostaje na iPhonie i wróci tutaj, gdy nadejdzie nowa wiadomość."
+
 #: src/gtk/messages_view.cpp
 msgid "Search conversations"
 msgstr "Szukaj rozmów"
@@ -2729,6 +2739,10 @@ msgstr "Do:"
 #: src/gtk/messages_view.cpp
 msgid "Phone number or email"
 msgstr "Numer telefonu lub e-mail"
+
+#: src/gtk/messages_view.cpp
+msgid "Remove Conversation"
+msgstr "Usuń wątek"
 
 #: src/gtk/messages_view.cpp
 msgid "Send"
@@ -2908,7 +2922,9 @@ msgstr "Ukryj wiadomości od nieznanych nadawców"
 msgid ""
 "Threads from numbers not in your contacts are hidden. Codes still pop up and "
 "autofill."
-msgstr "Wątki z numerami spoza kontaktów są ukryte. Kody nadal się pojawiają i są wypełniane automatycznie."
+msgstr ""
+"Wątki z numerami spoza kontaktów są ukryte. Kody nadal się pojawiają i są "
+"wypełniane automatycznie."
 
 #: src/gtk/settings_view.cpp src/tui/settings.cpp
 msgid ""
@@ -3040,8 +3056,8 @@ msgid "New message, or dial on Calls"
 msgstr "Nowa wiadomość lub wybieranie w Połączeniach"
 
 #: src/tui/main.cpp
-msgid "Dismiss, forget, unpair, or hang up"
-msgstr "Odrzuć, zapomnij, rozparuj lub rozłącz"
+msgid "Dismiss, forget, unpair, hang up, or remove a conversation"
+msgstr "Odrzuć, zapomnij, rozparuj, rozłącz lub usuń wątek"
 
 #: src/tui/main.cpp
 msgid "Copy the highlighted address or text"
