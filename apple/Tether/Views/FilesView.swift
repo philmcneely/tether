@@ -39,7 +39,7 @@ struct FilesView: View {
                         .accessibilityLabel("Open Received Files")
 
                         if viewModel.appState == .connected {
-                            PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
+                            PhotosPicker(selection: $selectedPhotoItem, matching: .images, preferredItemEncoding: .current) {
                                 Image(systemName: "photo.on.rectangle")
                                     .foregroundStyle(.teal)
                             }
@@ -74,7 +74,8 @@ struct FilesView: View {
                 
                 Task {
                     if let data = try? await newItem.loadTransferable(type: Data.self) {
-                        let defaultName = "Image_\(UUID().uuidString.prefix(6)).jpg"
+                        let ext = newItem.supportedContentTypes.first?.preferredFilenameExtension ?? "jpg"
+                        let defaultName = "Image_\(UUID().uuidString.prefix(6)).\(ext)"
                         viewModel.sendFile(data: data, filename: defaultName)
                     } else {
                         viewModel.errorMessage = "Could not read photo data."
@@ -157,7 +158,7 @@ struct FilesView: View {
                     .buttonStyle(.plain)
 
                     // Send Photo Button
-                    PhotosPicker(selection: $selectedPhotoItem, matching: .images, photoLibrary: .shared()) {
+                    PhotosPicker(selection: $selectedPhotoItem, matching: .images, preferredItemEncoding: .current, photoLibrary: .shared()) {
                         HStack(spacing: 14) {
                             ZStack {
                                 Circle()
