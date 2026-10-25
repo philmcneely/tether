@@ -326,6 +326,42 @@ This setup is useful for homelabs and headless Linux servers where a full GTK de
 
 ## Components
 
+```mermaid
+flowchart LR
+  subgraph phone["iPhone"]
+    app["Tether app<br/>+ share extension"]
+    ios["iOS<br/>MAP · PBAP · ANCS · HFP"]
+  end
+  peer["Other PC<br/>(tetherd)"]
+
+  subgraph linux["Linux"]
+    tetherd["tetherd"]
+    subgraph bluez["BlueZ"]
+      btd["bluetoothd"]
+      obexd["obexd"]
+    end
+    gtk["tether-gtk<br/>(GUI + tray)"]
+    tui["tether-tui"]
+    cli["tether CLI"]
+    host["native messaging host"]
+    ext["Browser / Thunderbird<br/>extension"]
+    desk["Wayland clipboard · notifications<br/>MPRIS · PipeWire"]
+  end
+
+  app <-- "WiFi: mTLS :5134, mDNS" --> tetherd
+  peer <-- "WiFi: mTLS :5134, mDNS" --> tetherd
+  ios <-- "Bluetooth BR/EDR + LE" --> btd
+  btd <-- "D-Bus" --> tetherd
+  obexd <-- "D-Bus" --> tetherd
+  obexd --- btd
+  tetherd <-- "UNIX socket" --> gtk
+  tetherd <-- "UNIX socket" --> tui
+  tetherd <-- "UNIX socket" --> cli
+  host <-- "stdin/stdout" --> ext
+  tetherd <-- "UNIX socket" --> host
+  tetherd --- desk
+```
+
 1. **`tetherd`**: A background process running on Linux manages Bluetooth, TCP+TLS with pinned device certificates, and Wayland integration.
 
 2. **`tether`**: A CLI to communicate with the daemon. This also allows the WebExtension to interface with the daemon via native messaging.
