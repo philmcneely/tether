@@ -1,4 +1,5 @@
 #include "notification.hpp"
+#include <algorithm>
 #include <charconv>
 #include <csignal>
 #include <cstdio>
@@ -263,11 +264,22 @@ int main(int argc, char** argv) {
             if (backfill || message.outgoing || message.read)
                 return;
 
+            const bool hide_unknown = tether::bluetooth::load_config().hide_unknown_senders;
             std::string who;
+            bool unknown = false;
             {
                 std::lock_guard<std::mutex> lock(tether::bluetooth::message_store_mutex());
                 who = tether::bluetooth::contact_store().name_for(message.thread_key);
+                if (hide_unknown) {
+                    const auto thread = tether::bluetooth::message_store().messages(message.thread_key);
+                    const bool replied =
+                        std::any_of(thread.begin(), thread.end(), [](const auto& m) { return m.outgoing; });
+                    unknown = tether::bluetooth::contact_store().is_unknown_sender(message.thread_key, replied);
+                }
             }
+            // hidden sender still pops up with a code,
+            if (unknown && otp.empty() && !tether::bluetooth::is_short_code(message.thread_key))
+                return;
             if (who.empty())
                 who = message.peer_name.empty() ? message.peer_address : message.peer_name;
             tether::bluetooth::ancs::Notification as_notification;
@@ -276,7 +288,7 @@ int main(int argc, char** argv) {
             tether::bluetooth::Recipient recipient;
             std::string reply_error;
             const bool repliable =
-                tether::bluetooth::recipient_from_thread_key(message.thread_key, recipient, reply_error);
+                !unknown && tether::bluetooth::recipient_from_thread_key(message.thread_key, recipient, reply_error);
             notifier.notify({_("Messages"),
                              who.empty() ? "iPhone" : who,
                              tether::popup_previews_enabled() ? message.body : std::string{},

@@ -428,6 +428,7 @@ namespace tether {
         status["retention_ready"] = secret::have_key();
         status["desktop_popups_enabled"] = config.desktop_popups_enabled;
         status["popup_previews_enabled"] = config.popup_previews_enabled;
+        status["hide_unknown_senders"] = config.hide_unknown_senders;
         status["airpods_enabled"] = config.airpods_enabled;
         status["airpods_pause"] = to_string(config.airpods_pause);
         status["airpods_handoff"] = config.airpods_handoff;
@@ -776,9 +777,12 @@ namespace tether {
         nlohmann::json result;
         result["command"] = "bt_threads";
         nlohmann::json threads = nlohmann::json::array();
+        const bool hide_unknown = bluetooth::load_config().hide_unknown_senders;
         {
             std::lock_guard<std::mutex> lock(bluetooth::message_store_mutex());
             for (const auto& thread : bluetooth::message_store().threads()) {
+                if (hide_unknown && bluetooth::contact_store().is_unknown_sender(thread.key, thread.replied))
+                    continue;
                 auto entry = bluetooth::to_json(thread);
                 // Contact names are applied for display only. Key on addresses, so a renamed or ambiguous contact can
                 // never change which conversation a message belongs to.
@@ -1509,6 +1513,12 @@ namespace tether {
                         bluetooth::save_config(config);
                         set_popup_previews_enabled(config.popup_previews_enabled);
                         broadcast_local_event(build_bt_status().dump());
+                    } else if (j.contains("command") && j["command"] == "set_hide_unknown_senders") {
+                        auto config = bluetooth::load_config();
+                        config.hide_unknown_senders = j.value("enabled", false);
+                        bluetooth::save_config(config);
+                        broadcast_local_event(build_bt_status().dump());
+                        broadcast_local_event(build_bt_threads().dump());
                     } else if (j.contains("command") && j["command"] == "bt_list_calls") {
                         nlohmann::json payload;
                         payload["command"] = "bt_calls";

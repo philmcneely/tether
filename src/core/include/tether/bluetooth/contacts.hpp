@@ -19,6 +19,10 @@ namespace tether::bluetooth {
         // messages use, e.g. "tel:+15551234567" or "email:someone@example.com".
         std::string name_for(const std::string& thread_key) const;
 
+        // A one-to-one sender that is neither a contact nor someone the user has
+        // replied to. Never true while no contacts are loaded, or every sender would be.
+        bool is_unknown_sender(const std::string& thread_key, bool replied) const;
+
         // Every address a display name maps to. Returns all matches.
         std::vector<std::string> addresses_for_name(const std::string& name) const;
 

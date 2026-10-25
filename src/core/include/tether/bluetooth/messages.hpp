@@ -52,6 +52,7 @@ namespace tether::bluetooth {
         int64_t last_timestamp = 0;
         int unread = 0;
         int count = 0;
+        bool replied = false;
     };
 
     // In-memory conversation store: dedupes by handle, groups into threads, and

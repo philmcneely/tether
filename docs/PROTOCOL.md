@@ -521,6 +521,14 @@ Thread keys are derived from the normalized peer address — `tel:+15035550101` 
 number, the lowercased address for an Apple ID — because MAP provides no conversation
 identifier. Group keys are `group:name:<slug>` or `group:members:<slugs>`.
 
+#### `set_hide_unknown_senders` (Client -> Daemon, broadcast)
+**Payload**: `{"command": "set_hide_unknown_senders", "enabled": true}`
+Persisted. `bt_threads` leaves out one-to-one threads whose sender is not a contact and has
+never been replied to; no-op while no contacts are loaded. Messages are still stored and OTP
+codes still reach the vault. Their popup is shown only when it carries a code or comes from
+a short code or sender ID, and offers no reply. Answered with `bt_status` and `bt_threads`
+broadcasts; reported as `hide_unknown_senders` in `bt_status`.
+
 #### `bt_list_messages` (Client -> Daemon, answered directly)
 **Payload**: `{"command": "bt_list_messages", "thread": "tel:+15035550101"}`
 **Response**: `{"command": "bt_messages", "thread": ..., "messages": [...]}` with `handle`,

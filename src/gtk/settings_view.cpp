@@ -33,6 +33,7 @@ namespace tether::ui {
             GtkWidget* row_retention = nullptr;
             GtkWidget* cmb_retention = nullptr;
             GtkWidget* lbl_keyring = nullptr;
+            GtkWidget* sw_hide_unknown = nullptr;
 
             GtkWidget* sw_last_name = nullptr;
 
@@ -141,6 +142,10 @@ namespace tether::ui {
             daemon_send({{"command", "set_popup_previews"}, {"enabled", gtk_switch_get_active(widget) == TRUE}});
         }
 
+        void on_hide_unknown_toggled(GtkSwitch* widget, GParamSpec*, gpointer) {
+            daemon_send({{"command", "set_hide_unknown_senders"}, {"enabled", gtk_switch_get_active(widget) == TRUE}});
+        }
+
         void on_last_name_toggled(GtkSwitch* widget, GParamSpec*, gpointer) {
             daemon_send(
                 {{"command", "bt_set_contacts_by_last_name"}, {"enabled", gtk_switch_get_active(widget) == TRUE}});
@@ -207,6 +212,10 @@ namespace tether::ui {
             set_switch(g_settings.sw_lock_away,
                        reinterpret_cast<gpointer>(on_lock_away_toggled),
                        status.value("lock_on_away", false));
+
+            set_switch(g_settings.sw_hide_unknown,
+                       reinterpret_cast<gpointer>(on_hide_unknown_toggled),
+                       status.value("hide_unknown_senders", false));
 
             set_switch(g_settings.sw_last_name,
                        reinterpret_cast<gpointer>(on_last_name_toggled),
@@ -349,6 +358,14 @@ namespace tether::ui {
                                                _("Encrypted uses a key from your desktop keyring. Do not keep "
                                                  "deletes what is stored."),
                                                g_settings.cmb_retention);
+
+            g_settings.sw_hide_unknown = new_switch();
+            g_signal_connect(
+                g_settings.sw_hide_unknown, "notify::active", G_CALLBACK(on_hide_unknown_toggled), nullptr);
+            add_row(messages,
+                    _("Hide messages from unknown senders"),
+                    _("Threads from numbers not in your contacts are hidden. Codes still pop up and autofill."),
+                    g_settings.sw_hide_unknown);
 
             g_settings.lbl_keyring =
                 gtk_label_new(_("Paused: no key from the desktop keyring. Unlock it, or choose Unencrypted."));

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tether\n"
 "Report-Msgid-Bugs-To: zack@bartel.com\n"
-"POT-Creation-Date: 2026-10-22 19:30-0700\n"
+"POT-Creation-Date: 2026-10-24 20:22-0700\n"
 "PO-Revision-Date: 2026-08-23\n"
 "Last-Translator: Tether project\n"
 "Language-Team: Simplified Chinese\n"
@@ -2764,6 +2764,16 @@ msgid ""
 "Encrypted uses a key from your desktop keyring. Do not keep deletes what is "
 "stored."
 msgstr "加密使用桌面密钥环中的密钥。不保留会删除已存储的内容。"
+
+#: src/gtk/settings_view.cpp src/tui/settings.cpp
+msgid "Hide messages from unknown senders"
+msgstr "隐藏来自未知发件人的信息"
+
+#: src/gtk/settings_view.cpp src/tui/settings.cpp
+msgid ""
+"Threads from numbers not in your contacts are hidden. Codes still pop up and "
+"autofill."
+msgstr "与不在通讯录中的号码的会话将被隐藏。验证码仍会弹出提示并自动填充。"
 
 #: src/gtk/settings_view.cpp src/tui/settings.cpp
 msgid ""

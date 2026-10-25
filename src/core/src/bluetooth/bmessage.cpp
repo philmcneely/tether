@@ -269,6 +269,13 @@ namespace tether::bluetooth {
         return {};
     }
 
+    bool is_short_code(const std::string& thread_key) {
+        if (thread_key.rfind("sender:", 0) == 0)
+            return true;
+        return thread_key.rfind("tel:", 0) == 0 && thread_key.size() > 4 && thread_key.size() <= 4 + 6 &&
+               thread_key[4] != '+';
+    }
+
     namespace {
         constexpr size_t TEL_SUFFIX_DIGITS = 10;
     } // namespace
