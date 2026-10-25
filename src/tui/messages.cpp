@@ -1,6 +1,7 @@
 #include "app.hpp"
 
 #include <ctime>
+#include <glib.h>
 #include <map>
 #include <message_format.hpp>
 #include <set>
@@ -70,6 +71,8 @@ namespace tether::tui {
                 }
                 return rows;
             }
+
+            void cursor_moved(const std::string& id) override { cursor_ = id; }
 
             void open(const std::string& key) override {
                 const json* thread = find_thread(key);
@@ -176,6 +179,10 @@ namespace tether::tui {
                     request_messages(selected_thread_);
                     return true;
                 }
+                if (action == "delete") {
+                    remove_thread(cursor_.empty() ? selected_thread_ : cursor_);
+                    return true;
+                }
                 return false;
             }
 
@@ -188,6 +195,10 @@ namespace tether::tui {
                 if (name == "msg") {
                     app::show_page("messages");
                     address(args);
+                    return true;
+                }
+                if (name == "remove") {
+                    remove_thread(cursor_.empty() ? selected_thread_ : cursor_);
                     return true;
                 }
                 if (name == "perms" || name == "solicit") {
@@ -274,6 +285,26 @@ namespace tether::tui {
             void request_messages(const std::string& key) {
                 if (!key.empty())
                     app::send({{"command", "bt_list_messages"}, {"thread", key}});
+            }
+
+            // Taken before the prompt: the list can refresh underneath it, and a
+            // message arriving meanwhile must stay visible.
+            void remove_thread(const std::string& key) {
+                const json* thread = find_thread(key);
+                if (!thread)
+                    return;
+                const std::string thread_key = thread->value("thread", "");
+                const int64_t before = thread->value("timestamp", static_cast<int64_t>(0));
+                const std::string name = thread->value("name", thread->value("address", thread_key));
+
+                gchar* question = g_strdup_printf(_("Remove the conversation with %s?"), name.c_str());
+                const std::string text = std::string(question ? question : "") + "\n" +
+                                         _("It stays on your iPhone, and comes back here when a new message arrives.");
+                g_free(question);
+                app::confirm(text, [thread_key, before] {
+                    if (!app::send({{"command", "bt_remove_thread"}, {"thread", thread_key}, {"before", before}}))
+                        app::status(_("Could not reach the Tether daemon."));
+                });
             }
 
             const json* find_thread(const std::string& key) const {
@@ -488,6 +519,8 @@ namespace tether::tui {
 
             std::string selected_thread_;
             std::string selected_name_;
+            // List row under the cursor, which may differ from the open thread.
+            std::string cursor_;
             bool selected_repliable_ = false;
             std::string selected_block_reason_;
             bool composing_ = false;

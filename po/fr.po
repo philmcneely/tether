@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tether\n"
 "Report-Msgid-Bugs-To: zack@bartel.com\n"
-"POT-Creation-Date: 2026-10-24 20:22-0700\n"
+"POT-Creation-Date: 2026-10-25 10:20-0700\n"
 "PO-Revision-Date: 2026-08-22\n"
 "Last-Translator: Tether project\n"
 "Language-Team: French\n"
@@ -2740,6 +2740,16 @@ msgstr "Envoyé"
 msgid "New Message"
 msgstr "Nouveau message"
 
+#: src/gtk/messages_view.cpp src/tui/messages.cpp
+#, c-format
+msgid "Remove the conversation with %s?"
+msgstr "Retirer la conversation avec %s ?"
+
+#: src/gtk/messages_view.cpp src/tui/messages.cpp
+msgid ""
+"It stays on your iPhone, and comes back here when a new message arrives."
+msgstr "Elle reste sur votre iPhone et réapparaît ici à l’arrivée d’un nouveau message."
+
 #: src/gtk/messages_view.cpp
 msgid "Search conversations"
 msgstr "Rechercher des conversations"
@@ -2751,6 +2761,10 @@ msgstr "À :"
 #: src/gtk/messages_view.cpp
 msgid "Phone number or email"
 msgstr "Numéro de téléphone ou e-mail"
+
+#: src/gtk/messages_view.cpp
+msgid "Remove Conversation"
+msgstr "Retirer la conversation"
 
 #: src/gtk/messages_view.cpp
 msgid "Send"
@@ -2933,7 +2947,9 @@ msgstr "Masquer les messages d’expéditeurs inconnus"
 msgid ""
 "Threads from numbers not in your contacts are hidden. Codes still pop up and "
 "autofill."
-msgstr "Les conversations avec des numéros absents de vos contacts sont masquées. Les codes s’affichent toujours et sont remplis automatiquement."
+msgstr ""
+"Les conversations avec des numéros absents de vos contacts sont masquées. "
+"Les codes s’affichent toujours et sont remplis automatiquement."
 
 #: src/gtk/settings_view.cpp src/tui/settings.cpp
 msgid ""
@@ -3068,8 +3084,8 @@ msgid "New message, or dial on Calls"
 msgstr "Nouveau message, ou composer dans Appels"
 
 #: src/tui/main.cpp
-msgid "Dismiss, forget, unpair, or hang up"
-msgstr "Ignorer, oublier, dissocier ou raccrocher"
+msgid "Dismiss, forget, unpair, hang up, or remove a conversation"
+msgstr "Ignorer, oublier, dissocier, raccrocher ou retirer une conversation"
 
 #: src/tui/main.cpp
 msgid "Copy the highlighted address or text"

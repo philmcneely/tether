@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tether\n"
 "Report-Msgid-Bugs-To: zack@bartel.com\n"
-"POT-Creation-Date: 2026-10-24 20:22-0700\n"
+"POT-Creation-Date: 2026-10-25 10:20-0700\n"
 "PO-Revision-Date: 2026-08-23\n"
 "Last-Translator: Tether project\n"
 "Language-Team: Japanese\n"
@@ -2693,6 +2693,16 @@ msgstr "送信済み"
 msgid "New Message"
 msgstr "新規メッセージ"
 
+#: src/gtk/messages_view.cpp src/tui/messages.cpp
+#, c-format
+msgid "Remove the conversation with %s?"
+msgstr "%s とのスレッドを一覧から外しますか？"
+
+#: src/gtk/messages_view.cpp src/tui/messages.cpp
+msgid ""
+"It stays on your iPhone, and comes back here when a new message arrives."
+msgstr "iPhone には残り、新しいメッセージが届くとここに再び表示されます。"
+
 #: src/gtk/messages_view.cpp
 msgid "Search conversations"
 msgstr "会話を検索"
@@ -2704,6 +2714,10 @@ msgstr "宛先:"
 #: src/gtk/messages_view.cpp
 msgid "Phone number or email"
 msgstr "電話番号またはメールアドレス"
+
+#: src/gtk/messages_view.cpp
+msgid "Remove Conversation"
+msgstr "スレッドを一覧から外す"
 
 #: src/gtk/messages_view.cpp
 msgid "Send"
@@ -2883,7 +2897,9 @@ msgstr "不明な差出人からのメッセージを非表示"
 msgid ""
 "Threads from numbers not in your contacts are hidden. Codes still pop up and "
 "autofill."
-msgstr "連絡先にない番号とのスレッドは非表示になります。コードは引き続き通知され、自動入力されます。"
+msgstr ""
+"連絡先にない番号とのスレッドは非表示になります。コードは引き続き通知され、自"
+"動入力されます。"
 
 #: src/gtk/settings_view.cpp src/tui/settings.cpp
 msgid ""
@@ -3014,8 +3030,8 @@ msgid "New message, or dial on Calls"
 msgstr "新規メッセージ、通話タブでは発信"
 
 #: src/tui/main.cpp
-msgid "Dismiss, forget, unpair, or hang up"
-msgstr "消去、削除、ペアリング解除、または終話"
+msgid "Dismiss, forget, unpair, hang up, or remove a conversation"
+msgstr "消去、削除、ペアリング解除、終話、またはスレッドを一覧から外す"
 
 #: src/tui/main.cpp
 msgid "Copy the highlighted address or text"

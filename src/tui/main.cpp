@@ -591,7 +591,7 @@ namespace tether::tui {
             {"i a", N_("Write in the open conversation")},
             {"Enter / C-j", N_("Send / new line (insert mode)")},
             {"o", N_("New message, or dial on Calls")},
-            {"dd", N_("Dismiss, forget, unpair, or hang up")},
+            {"dd", N_("Dismiss, forget, unpair, hang up, or remove a conversation")},
             {"yy", N_("Copy the highlighted address or text")},
             {"r", N_("Refresh, or scan for devices")},
             {":send FILE…", N_("Send files to the selected device")},

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tether\n"
 "Report-Msgid-Bugs-To: zack@bartel.com\n"
-"POT-Creation-Date: 2026-10-24 20:22-0700\n"
+"POT-Creation-Date: 2026-10-25 10:20-0700\n"
 "PO-Revision-Date: 2026-08-23\n"
 "Last-Translator: Tether project\n"
 "Language-Team: Swedish\n"
@@ -2689,6 +2689,16 @@ msgstr "Skickat"
 msgid "New Message"
 msgstr "Nytt meddelande"
 
+#: src/gtk/messages_view.cpp src/tui/messages.cpp
+#, c-format
+msgid "Remove the conversation with %s?"
+msgstr "Ta bort tråden med %s?"
+
+#: src/gtk/messages_view.cpp src/tui/messages.cpp
+msgid ""
+"It stays on your iPhone, and comes back here when a new message arrives."
+msgstr "Den finns kvar på din iPhone och dyker upp här igen när ett nytt meddelande kommer."
+
 #: src/gtk/messages_view.cpp
 msgid "Search conversations"
 msgstr "Sök konversationer"
@@ -2700,6 +2710,10 @@ msgstr "Till:"
 #: src/gtk/messages_view.cpp
 msgid "Phone number or email"
 msgstr "Telefonnummer eller e-post"
+
+#: src/gtk/messages_view.cpp
+msgid "Remove Conversation"
+msgstr "Ta bort tråd"
 
 #: src/gtk/messages_view.cpp
 msgid "Send"
@@ -2880,7 +2894,9 @@ msgstr "Dölj meddelanden från okända avsändare"
 msgid ""
 "Threads from numbers not in your contacts are hidden. Codes still pop up and "
 "autofill."
-msgstr "Trådar med nummer som inte finns bland dina kontakter döljs. Koder visas fortfarande och fylls i automatiskt."
+msgstr ""
+"Trådar med nummer som inte finns bland dina kontakter döljs. Koder visas "
+"fortfarande och fylls i automatiskt."
 
 #: src/gtk/settings_view.cpp src/tui/settings.cpp
 msgid ""
@@ -3011,8 +3027,8 @@ msgid "New message, or dial on Calls"
 msgstr "Nytt meddelande, eller ring under Samtal"
 
 #: src/tui/main.cpp
-msgid "Dismiss, forget, unpair, or hang up"
-msgstr "Avvisa, glöm, ta bort parkoppling eller lägg på"
+msgid "Dismiss, forget, unpair, hang up, or remove a conversation"
+msgstr "Avvisa, glöm, ta bort parkoppling, lägg på eller ta bort en tråd"
 
 #: src/tui/main.cpp
 msgid "Copy the highlighted address or text"

@@ -28,6 +28,7 @@ add_library(tether STATIC
     src/bluetooth/messages.cpp
     src/bluetooth/map_session.cpp
     src/bluetooth/contacts.cpp
+    src/bluetooth/removed_threads.cpp
     src/bluetooth/journal.cpp
     src/bluetooth/pbap_session.cpp
     src/bluetooth/obex_transfer.cpp

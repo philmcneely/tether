@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tether\n"
 "Report-Msgid-Bugs-To: zack@bartel.com\n"
-"POT-Creation-Date: 2026-10-24 20:22-0700\n"
+"POT-Creation-Date: 2026-10-25 10:20-0700\n"
 "PO-Revision-Date: 2026-08-22\n"
 "Last-Translator: Tether project\n"
 "Language-Team: German\n"
@@ -2755,6 +2755,16 @@ msgstr "Gesendet"
 msgid "New Message"
 msgstr "Neue Nachricht"
 
+#: src/gtk/messages_view.cpp src/tui/messages.cpp
+#, c-format
+msgid "Remove the conversation with %s?"
+msgstr "Die Unterhaltung mit %s entfernen?"
+
+#: src/gtk/messages_view.cpp src/tui/messages.cpp
+msgid ""
+"It stays on your iPhone, and comes back here when a new message arrives."
+msgstr "Sie bleibt auf deinem iPhone und erscheint hier wieder, sobald eine neue Nachricht eintrifft."
+
 #: src/gtk/messages_view.cpp
 msgid "Search conversations"
 msgstr "Unterhaltungen durchsuchen"
@@ -2766,6 +2776,10 @@ msgstr "An:"
 #: src/gtk/messages_view.cpp
 msgid "Phone number or email"
 msgstr "Telefonnummer oder E-Mail"
+
+#: src/gtk/messages_view.cpp
+msgid "Remove Conversation"
+msgstr "Unterhaltung entfernen"
 
 #: src/gtk/messages_view.cpp
 msgid "Send"
@@ -2947,7 +2961,9 @@ msgstr "Nachrichten von unbekannten Absendern ausblenden"
 msgid ""
 "Threads from numbers not in your contacts are hidden. Codes still pop up and "
 "autofill."
-msgstr "Unterhaltungen mit Nummern, die nicht in deinen Kontakten sind, werden ausgeblendet. Codes erscheinen weiterhin und werden automatisch ausgefüllt."
+msgstr ""
+"Unterhaltungen mit Nummern, die nicht in deinen Kontakten sind, werden "
+"ausgeblendet. Codes erscheinen weiterhin und werden automatisch ausgefüllt."
 
 #: src/gtk/settings_view.cpp src/tui/settings.cpp
 msgid ""
@@ -3080,8 +3096,8 @@ msgid "New message, or dial on Calls"
 msgstr "Neue Nachricht, unter Anrufe wählen"
 
 #: src/tui/main.cpp
-msgid "Dismiss, forget, unpair, or hang up"
-msgstr "Verwerfen, vergessen, entkoppeln oder auflegen"
+msgid "Dismiss, forget, unpair, hang up, or remove a conversation"
+msgstr "Verwerfen, vergessen, entkoppeln, auflegen oder Unterhaltung entfernen"
 
 #: src/tui/main.cpp
 msgid "Copy the highlighted address or text"

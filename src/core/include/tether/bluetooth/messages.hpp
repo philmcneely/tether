@@ -3,6 +3,7 @@
 #include "tether/bluetooth/bmessage.hpp"
 
 #include <cstdint>
+#include <functional>
 #include <map>
 #include <nlohmann/json.hpp>
 #include <string>
@@ -71,10 +72,15 @@ namespace tether::bluetooth {
 
         const Message* find(const std::string& handle) const;
 
+        // Messages `visible` rejects are left out before anything is counted.
+        // Empty means all of them.
+        using Visible = std::function<bool(const Message&)>;
+
         // Newest activity first.
-        std::vector<Thread> threads() const;
+        std::vector<Thread> threads(const Visible& visible = {}) const;
         // Oldest first within a thread, limited to the most recent `limit`.
-        std::vector<Message> messages(const std::string& thread_key, size_t limit = 200) const;
+        std::vector<Message>
+            messages(const std::string& thread_key, size_t limit = 200, const Visible& visible = {}) const;
 
         size_t size() const { return by_handle_.size(); }
 

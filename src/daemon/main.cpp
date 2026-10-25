@@ -16,6 +16,7 @@
 #include <tether/bluetooth/contacts.hpp>
 #include <tether/bluetooth/monitor.hpp>
 #include <tether/bluetooth/pairing.hpp>
+#include <tether/bluetooth/removed_threads.hpp>
 #include <tether/core.hpp>
 #include <tether/crypto.hpp>
 #include <tether/discovery.hpp>
@@ -267,11 +268,15 @@ int main(int argc, char** argv) {
             const bool hide_unknown = tether::bluetooth::load_config().hide_unknown_senders;
             std::string who;
             bool unknown = false;
+            bool hidden = false;
             {
                 std::lock_guard<std::mutex> lock(tether::bluetooth::message_store_mutex());
                 who = tether::bluetooth::contact_store().name_for(message.thread_key);
+                const auto& removed = tether::bluetooth::removed_threads();
+                hidden = removed.hides(message);
                 if (hide_unknown) {
-                    const auto thread = tether::bluetooth::message_store().messages(message.thread_key);
+                    const auto thread = tether::bluetooth::message_store().messages(
+                        message.thread_key, 200, [&removed](const auto& m) { return !removed.hides(m); });
                     const bool replied =
                         std::any_of(thread.begin(), thread.end(), [](const auto& m) { return m.outgoing; });
                     unknown = tether::bluetooth::contact_store().is_unknown_sender(message.thread_key, replied);
@@ -279,6 +284,8 @@ int main(int argc, char** argv) {
             }
             // hidden sender still pops up with a code,
             if (unknown && otp.empty() && !tether::bluetooth::is_short_code(message.thread_key))
+                return;
+            if (hidden && otp.empty())
                 return;
             if (who.empty())
                 who = message.peer_name.empty() ? message.peer_address : message.peer_name;

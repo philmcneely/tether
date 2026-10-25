@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tether\n"
 "Report-Msgid-Bugs-To: zack@bartel.com\n"
-"POT-Creation-Date: 2026-10-24 20:22-0700\n"
+"POT-Creation-Date: 2026-10-25 10:20-0700\n"
 "PO-Revision-Date: 2026-08-23\n"
 "Last-Translator: Tether project\n"
 "Language-Team: Ukrainian\n"
@@ -2713,6 +2713,16 @@ msgstr "Надіслано"
 msgid "New Message"
 msgstr "Нове повідомлення"
 
+#: src/gtk/messages_view.cpp src/tui/messages.cpp
+#, c-format
+msgid "Remove the conversation with %s?"
+msgstr "Прибрати розмову з %s?"
+
+#: src/gtk/messages_view.cpp src/tui/messages.cpp
+msgid ""
+"It stays on your iPhone, and comes back here when a new message arrives."
+msgstr "Вона залишиться на iPhone і знову з’явиться тут, коли надійде нове повідомлення."
+
 #: src/gtk/messages_view.cpp
 msgid "Search conversations"
 msgstr "Пошук розмов"
@@ -2724,6 +2734,10 @@ msgstr "Кому:"
 #: src/gtk/messages_view.cpp
 msgid "Phone number or email"
 msgstr "Номер телефону або ел. пошта"
+
+#: src/gtk/messages_view.cpp
+msgid "Remove Conversation"
+msgstr "Прибрати розмову"
 
 #: src/gtk/messages_view.cpp
 msgid "Send"
@@ -2904,7 +2918,9 @@ msgstr "Приховувати повідомлення від невідоми�
 msgid ""
 "Threads from numbers not in your contacts are hidden. Codes still pop up and "
 "autofill."
-msgstr "Розмови з номерами, яких немає в контактах, приховано. Коди й надалі з’являються та підставляються автоматично."
+msgstr ""
+"Розмови з номерами, яких немає в контактах, приховано. Коди й надалі "
+"з’являються та підставляються автоматично."
 
 #: src/gtk/settings_view.cpp src/tui/settings.cpp
 msgid ""
@@ -3035,8 +3051,8 @@ msgid "New message, or dial on Calls"
 msgstr "Нове повідомлення або набір номера на вкладці «Дзвінки»"
 
 #: src/tui/main.cpp
-msgid "Dismiss, forget, unpair, or hang up"
-msgstr "Приховати, забути, роз'єднати пару або завершити дзвінок"
+msgid "Dismiss, forget, unpair, hang up, or remove a conversation"
+msgstr "Приховати, забути, роз'єднати пару, завершити дзвінок або прибрати розмову"
 
 #: src/tui/main.cpp
 msgid "Copy the highlighted address or text"

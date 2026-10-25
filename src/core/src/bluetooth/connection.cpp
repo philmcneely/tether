@@ -9,6 +9,7 @@
 #include "tether/bluetooth/monitor.hpp"
 #include "tether/bluetooth/pairing.hpp"
 #include "tether/bluetooth/pbap_session.hpp"
+#include "tether/bluetooth/removed_threads.hpp"
 #include "tether/log.hpp"
 #include "tether/net.hpp"
 #include "tether/secret_store.hpp"
@@ -64,6 +65,18 @@ namespace tether::bluetooth {
                     members.push_back(recipient);
             }
             return sender_invalidates_route(sender_key, members);
+        }
+
+        // Loads the saved list, keeping anything removed while it could not be
+        // read. Caller holds g_messages_mutex.
+        void restore_removed_threads() {
+            RemovedThreads loaded = load_removed_threads();
+            const bool unsaved = removed_threads().size() > 0;
+            for (const auto& [key, cutoff] : removed_threads().cutoffs())
+                loaded.remove(key, cutoff);
+            removed_threads() = std::move(loaded);
+            if (unsaved)
+                save_removed_threads(removed_threads());
         }
     } // namespace
 
@@ -177,6 +190,8 @@ namespace tether::bluetooth {
         std::lock_guard<std::mutex> lock(g_messages_mutex);
         g_journal.close();
         migrate_contacts(previous, next);
+        if (!migrate_removed_threads(previous, next) && removed_threads().size() > 0)
+            save_removed_threads(removed_threads());
     }
 
     void set_group_replies_enabled(bool enabled) {
@@ -857,6 +872,7 @@ namespace tether::bluetooth {
                         contact_store() = load_contacts();
                     else
                         save_contacts(contact_store());
+                    restore_removed_threads();
                     auto history = g_journal.load(now);
                     for (const auto& message : history)
                         g_messages.add(message);
@@ -1464,6 +1480,7 @@ namespace tether::bluetooth {
         {
             std::lock_guard<std::mutex> lock(g_messages_mutex);
             contact_store() = load_contacts();
+            restore_removed_threads();
             if (g_journal.open()) {
                 const int64_t now = static_cast<int64_t>(std::time(nullptr));
                 auto history = g_journal.load(now);

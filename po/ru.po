@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tether\n"
 "Report-Msgid-Bugs-To: zack@bartel.com\n"
-"POT-Creation-Date: 2026-10-24 20:22-0700\n"
+"POT-Creation-Date: 2026-10-25 10:20-0700\n"
 "PO-Revision-Date: 2026-08-23\n"
 "Last-Translator: Tether project\n"
 "Language-Team: Russian\n"
@@ -2718,6 +2718,16 @@ msgstr "Отправлено"
 msgid "New Message"
 msgstr "Новое сообщение"
 
+#: src/gtk/messages_view.cpp src/tui/messages.cpp
+#, c-format
+msgid "Remove the conversation with %s?"
+msgstr "Убрать переписку с %s?"
+
+#: src/gtk/messages_view.cpp src/tui/messages.cpp
+msgid ""
+"It stays on your iPhone, and comes back here when a new message arrives."
+msgstr "Она останется на iPhone и снова появится здесь, когда придёт новое сообщение."
+
 #: src/gtk/messages_view.cpp
 msgid "Search conversations"
 msgstr "Поиск переписок"
@@ -2729,6 +2739,10 @@ msgstr "Кому:"
 #: src/gtk/messages_view.cpp
 msgid "Phone number or email"
 msgstr "Номер телефона или эл. почта"
+
+#: src/gtk/messages_view.cpp
+msgid "Remove Conversation"
+msgstr "Убрать переписку"
 
 #: src/gtk/messages_view.cpp
 msgid "Send"
@@ -2910,7 +2924,9 @@ msgstr "Скрывать сообщения от неизвестных отпр
 msgid ""
 "Threads from numbers not in your contacts are hidden. Codes still pop up and "
 "autofill."
-msgstr "Переписки с номерами, которых нет в контактах, скрыты. Коды по-прежнему показываются и подставляются автоматически."
+msgstr ""
+"Переписки с номерами, которых нет в контактах, скрыты. Коды по-прежнему "
+"показываются и подставляются автоматически."
 
 #: src/gtk/settings_view.cpp src/tui/settings.cpp
 msgid ""
@@ -3042,8 +3058,8 @@ msgid "New message, or dial on Calls"
 msgstr "Новое сообщение или набор номера во вкладке «Звонки»"
 
 #: src/tui/main.cpp
-msgid "Dismiss, forget, unpair, or hang up"
-msgstr "Скрыть, забыть, разорвать сопряжение или завершить звонок"
+msgid "Dismiss, forget, unpair, hang up, or remove a conversation"
+msgstr "Скрыть, забыть, разорвать сопряжение, завершить звонок или убрать переписку"
 
 #: src/tui/main.cpp
 msgid "Copy the highlighted address or text"

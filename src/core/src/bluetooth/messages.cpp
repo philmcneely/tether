@@ -138,11 +138,11 @@ namespace tether::bluetooth {
         }
     }
 
-    std::vector<Thread> MessageStore::threads() const {
+    std::vector<Thread> MessageStore::threads(const Visible& visible) const {
         std::map<std::string, Thread> grouped;
 
         for (const auto& [handle, message] : by_handle_) {
-            if (message.thread_key.empty())
+            if (message.thread_key.empty() || (visible && !visible(message)))
                 continue;
             Thread& thread = grouped[message.thread_key];
             thread.key = message.thread_key;
@@ -180,12 +180,13 @@ namespace tether::bluetooth {
         return result;
     }
 
-    std::vector<Message> MessageStore::messages(const std::string& thread_key, size_t limit) const {
+    std::vector<Message>
+        MessageStore::messages(const std::string& thread_key, size_t limit, const Visible& visible) const {
         // Matched on the bucket, not the string
         const std::string bucket = thread_bucket(thread_key);
         std::vector<Message> result;
         for (const auto& [handle, message] : by_handle_) {
-            if (thread_bucket(message.thread_key) == bucket)
+            if (thread_bucket(message.thread_key) == bucket && (!visible || visible(message)))
                 result.push_back(message);
         }
 
