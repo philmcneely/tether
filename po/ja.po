@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tether\n"
 "Report-Msgid-Bugs-To: zack@bartel.com\n"
-"POT-Creation-Date: 2026-10-22 19:30-0700\n"
+"POT-Creation-Date: 2026-10-24 20:22-0700\n"
 "PO-Revision-Date: 2026-08-23\n"
 "Last-Translator: Tether project\n"
 "Language-Team: Japanese\n"
@@ -2874,6 +2874,16 @@ msgid ""
 msgstr ""
 "暗号化するはデスクトップのキーリングの鍵を使います。保持しないは保存済みのも"
 "のを削除します。"
+
+#: src/gtk/settings_view.cpp src/tui/settings.cpp
+msgid "Hide messages from unknown senders"
+msgstr "不明な差出人からのメッセージを非表示"
+
+#: src/gtk/settings_view.cpp src/tui/settings.cpp
+msgid ""
+"Threads from numbers not in your contacts are hidden. Codes still pop up and "
+"autofill."
+msgstr "連絡先にない番号とのスレッドは非表示になります。コードは引き続き通知され、自動入力されます。"
 
 #: src/gtk/settings_view.cpp src/tui/settings.cpp
 msgid ""

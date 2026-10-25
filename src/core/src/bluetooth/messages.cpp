@@ -148,6 +148,7 @@ namespace tether::bluetooth {
             thread.key = message.thread_key;
             thread.peer_address = message.peer_address;
             ++thread.count;
+            thread.replied = thread.replied || message.outgoing;
 
             if (thread.display_name.empty() ||
                 (!message.peer_name.empty() && thread.display_name == thread.peer_address))

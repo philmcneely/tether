@@ -65,6 +65,7 @@ namespace tether::bluetooth {
         j["retention"] = to_string(config.retention);
         j["desktop_popups_enabled"] = config.desktop_popups_enabled;
         j["popup_previews_enabled"] = config.popup_previews_enabled;
+        j["hide_unknown_senders"] = config.hide_unknown_senders;
         j["airpods_enabled"] = config.airpods_enabled;
         j["airpods_pause"] = to_string(config.airpods_pause);
         j["airpods_handoff"] = config.airpods_handoff;
@@ -95,6 +96,7 @@ namespace tether::bluetooth {
             config.retention = retention_from_string(j.value("retention", "encrypted"));
             config.desktop_popups_enabled = j.value("desktop_popups_enabled", true);
             config.popup_previews_enabled = j.value("popup_previews_enabled", true);
+            config.hide_unknown_senders = j.value("hide_unknown_senders", false);
             config.airpods_enabled = j.value("airpods_enabled", false);
             config.airpods_pause = pause_mode_from_string(j.value("airpods_pause", ""));
             config.airpods_handoff = j.value("airpods_handoff", false);

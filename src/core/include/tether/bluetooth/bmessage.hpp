@@ -55,6 +55,10 @@ namespace tether::bluetooth {
     // The stable key for one conversation.
     std::string thread_key_for(const VCardParty& party);
 
+    // True for an alphanumeric sender ID or a short code (six digits or fewer),
+    // the senders codes and alerts arrive from.
+    bool is_short_code(const std::string& thread_key);
+
     // The nationally significant digits of a number, used to recognize two
     // spellings of one number. Empty when there are fewer than 10 digits.
     std::string tel_suffix(const std::string& raw);

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tether\n"
 "Report-Msgid-Bugs-To: zack@bartel.com\n"
-"POT-Creation-Date: 2026-10-22 19:30-0700\n"
+"POT-Creation-Date: 2026-10-24 20:22-0700\n"
 "PO-Revision-Date: 2026-08-22\n"
 "Last-Translator: Tether project\n"
 "Language-Team: French\n"
@@ -2926,6 +2926,16 @@ msgstr ""
 "stocké."
 
 #: src/gtk/settings_view.cpp src/tui/settings.cpp
+msgid "Hide messages from unknown senders"
+msgstr "Masquer les messages d’expéditeurs inconnus"
+
+#: src/gtk/settings_view.cpp src/tui/settings.cpp
+msgid ""
+"Threads from numbers not in your contacts are hidden. Codes still pop up and "
+"autofill."
+msgstr "Les conversations avec des numéros absents de vos contacts sont masquées. Les codes s’affichent toujours et sont remplis automatiquement."
+
+#: src/gtk/settings_view.cpp src/tui/settings.cpp
 msgid ""
 "Paused: no key from the desktop keyring. Unlock it, or choose Unencrypted."
 msgstr ""
@@ -2939,7 +2949,9 @@ msgstr "Trier les contacts par nom"
 #: src/gtk/settings_view.cpp src/tui/settings.cpp
 msgid ""
 "Contacts with only one name, and businesses, sort by the name they have."
-msgstr "Les contacts avec un seul nom et les entreprises sont triés selon le nom qu’ils ont."
+msgstr ""
+"Les contacts avec un seul nom et les entreprises sont triés selon le nom "
+"qu’ils ont."
 
 #: src/gtk/settings_view.cpp src/tui/settings.cpp
 msgid "Experimental"

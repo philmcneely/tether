@@ -58,6 +58,12 @@ namespace tether::bluetooth {
         return {};
     }
 
+    bool ContactStore::is_unknown_sender(const std::string& thread_key, bool replied) const {
+        if (replied || contacts_.empty() || thread_key.rfind("group:", 0) == 0)
+            return false;
+        return name_for(thread_key).empty();
+    }
+
     std::vector<std::string> ContactStore::addresses_for_name(const std::string& name) const {
         std::vector<std::string> out;
         if (name.empty())

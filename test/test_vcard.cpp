@@ -210,6 +210,40 @@ TEST(ContactStore, RefusesToGuessWhenTwoContactsShareASuffix) {
     EXPECT_EQ(store.name_for("tel:5551234567"), "") << "an ambiguous suffix resolves to no name";
 }
 
+TEST(ContactStore, UnknownSenderIsNeitherContactNorReplied) {
+    ContactStore store;
+    EXPECT_FALSE(store.is_unknown_sender("tel:+15559999999", false)) << "nothing is unknown before contacts load";
+
+    store.set(parse_vcards("BEGIN:VCARD\nFN:Ada\nTEL:+15551234567\nEND:VCARD\n"));
+    EXPECT_FALSE(store.is_unknown_sender("tel:+15551234567", false));
+    EXPECT_FALSE(store.is_unknown_sender("tel:5551234567", false)) << "the national form of a contact is known";
+    EXPECT_TRUE(store.is_unknown_sender("tel:+15559999999", false));
+    EXPECT_TRUE(store.is_unknown_sender("email:spam@example.com", false));
+    EXPECT_TRUE(store.is_unknown_sender("sender:amazon", false));
+    EXPECT_FALSE(store.is_unknown_sender("tel:+15559999999", true)) << "a thread the user replied to is known";
+    EXPECT_FALSE(store.is_unknown_sender("group:members:a,b", false));
+}
+
+TEST(ThreadKeys, RecognizesShortCodesAndSenderIds) {
+    EXPECT_TRUE(is_short_code("sender:amazon"));
+    EXPECT_TRUE(is_short_code("tel:32665"));
+    EXPECT_TRUE(is_short_code("tel:123456"));
+    EXPECT_FALSE(is_short_code("tel:1234567"));
+    EXPECT_FALSE(is_short_code("tel:+12345"));
+    EXPECT_FALSE(is_short_code("tel:"));
+    EXPECT_FALSE(is_short_code("email:a@b.c"));
+}
+
+TEST(MessageStore, ThreadRecordsWhetherTheUserReplied) {
+    MessageStore store;
+    store.add({.handle = "1", .thread_key = "tel:+15559999999", .body = "hi", .timestamp = 1});
+    store.add({.handle = "2", .thread_key = "tel:+15558888888", .body = "hi", .timestamp = 2});
+    store.add({.handle = "3", .thread_key = "tel:+15558888888", .body = "yo", .timestamp = 3, .outgoing = true});
+
+    for (const auto& thread : store.threads())
+        EXPECT_EQ(thread.replied, thread.key == "tel:+15558888888") << thread.key;
+}
+
 // Shortcodes and extensions are too short to carry a country code, so they match
 // exactly or not at all.
 TEST(ContactStore, DoesNotSuffixMatchShortNumbers) {
