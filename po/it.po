@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tether\n"
 "Report-Msgid-Bugs-To: zack@bartel.com\n"
-"POT-Creation-Date: 2026-10-25 10:20-0700\n"
+"POT-Creation-Date: 2026-10-25 20:55-0700\n"
 "PO-Revision-Date: 2026-08-23\n"
 "Last-Translator: Tether project\n"
 "Language-Team: Italian\n"
@@ -249,6 +249,16 @@ msgstr ""
 "Riproduci l'audio delle chiamate su questo computer oppure lascialo "
 "sull'iPhone. Richiede che sia PipeWire a gestire il vivavoce; off vale dalla "
 "chiamata successiva."
+
+#: src/cli/main.cpp
+msgid ""
+"Play the iPhone's music and sounds on this computer, or keep them on the "
+"iPhone. auto leaves it to the iPhone and the audio server. Without an "
+"argument, show where it plays."
+msgstr ""
+"Riproduce musica e suoni dell'iPhone su questo computer, oppure li lascia "
+"sull'iPhone. auto lascia decidere all'iPhone e al server audio. Senza "
+"argomento, mostra dove vengono riprodotti."
 
 #: src/cli/main.cpp
 msgid "Print a redacted Bluetooth report for a bug report."
@@ -1081,6 +1091,43 @@ msgstr "Contatti ordinati per cognome."
 #: src/cli/main.cpp
 msgid "Contacts sorted by first name."
 msgstr "Contatti ordinati per nome."
+
+#: src/cli/main.cpp
+msgid "The iPhone's audio plays on this computer."
+msgstr "L'audio dell'iPhone viene riprodotto su questo computer."
+
+#: src/cli/main.cpp
+msgid "The iPhone's audio stays on the iPhone."
+msgstr "L'audio dell'iPhone resta sull'iPhone."
+
+#: src/cli/main.cpp
+msgid ""
+"Unavailable: the iPhone is not connected over Classic, or the audio server "
+"does not offer the a2dp_sink role."
+msgstr ""
+"Non disponibile: l'iPhone non è connesso tramite Bluetooth Classic, oppure "
+"il server audio non offre il ruolo a2dp_sink."
+
+#: src/cli/main.cpp
+#, c++-format
+msgid "Remembered choice: {}"
+msgstr "Scelta memorizzata: {}"
+
+#: src/cli/main.cpp
+msgid "Expected here, phone or auto, e.g. --bt-phone-audio here\n"
+msgstr "Previsto here, phone o auto, ad es. --bt-phone-audio here\n"
+
+#: src/cli/main.cpp
+msgid "The iPhone's audio comes to this computer."
+msgstr "L'audio dell'iPhone passa a questo computer."
+
+#: src/cli/main.cpp
+msgid "The iPhone's audio goes back to the iPhone."
+msgstr "L'audio dell'iPhone torna sull'iPhone."
+
+#: src/cli/main.cpp
+msgid "Phone audio follows the iPhone and the audio server."
+msgstr "L'audio del telefono segue l'iPhone e il server audio."
 
 #: src/cli/main.cpp
 msgid "Expected on or off, e.g. --bt-calls-enable on\n"
@@ -2974,6 +3021,18 @@ msgstr "Controllo chiamate via Bluetooth"
 msgid "Answer and place calls from the Calls tab."
 msgstr "Rispondi ed effettua chiamate dalla scheda Chiamate."
 
+#: src/gtk/settings_view.cpp src/tui/settings.cpp
+msgid "Play the iPhone's audio on this computer"
+msgstr "Riproduci l'audio dell'iPhone su questo computer"
+
+#: src/gtk/settings_view.cpp src/tui/settings.cpp
+msgid ""
+"Music and sounds from the iPhone play here. Off sends them back to the "
+"iPhone. Calls are not affected."
+msgstr ""
+"Musica e suoni dell'iPhone vengono riprodotti qui. Disattivato li rimanda "
+"all'iPhone. Le chiamate non sono interessate."
+
 #: src/gtk/tray.cpp src/gtk/ui_util.cpp src/tui/main.cpp
 msgid "connected"
 msgstr "connesso"
@@ -3271,11 +3330,6 @@ msgstr "iPhone;iOS;SMS;Messaggi;Appunti;File;Notifiche;Chiamate;AirPods;"
 #~ "bluez5.roles e il servizio D-Bus di telefonia di PipeWire, nessuno dei "
 #~ "quali viene installato da Tether."
 
-#~ msgid "Move call audio to this computer, or back to the iPhone."
-#~ msgstr ""
-#~ "Spostare l'audio della chiamata su questo computer, o di nuovo "
-#~ "sull'iPhone."
-
 #~ msgid ""
 #~ "Turn call control on or off. Needs the hfp_hf role and telephony service "
 #~ "in WirePlumber; see docs/BLUETOOTH.md."
@@ -3290,9 +3344,6 @@ msgstr "iPhone;iOS;SMS;Messaggi;Appunti;File;Notifiche;Chiamate;AirPods;"
 #~ msgstr ""
 #~ "Riprodurre la chiamata con gli altoparlanti e il microfono di questo "
 #~ "computer. La restituzione vale dalla chiamata successiva."
-
-#~ msgid "Expected here or phone, e.g. --bt-call-audio here\n"
-#~ msgstr "Atteso here o phone, ad es. --bt-call-audio here\n"
 
 #~ msgid ""
 #~ "New calls will stay on the iPhone. A call already playing here does not "

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tether\n"
 "Report-Msgid-Bugs-To: zack@bartel.com\n"
-"POT-Creation-Date: 2026-10-25 10:20-0700\n"
+"POT-Creation-Date: 2026-10-25 20:55-0700\n"
 "PO-Revision-Date: 2026-08-23\n"
 "Last-Translator: Tether project\n"
 "Language-Team: Swedish\n"
@@ -245,6 +245,16 @@ msgid ""
 msgstr ""
 "Spela upp samtalsljudet på den här datorn eller låt det ligga kvar på "
 "iPhone. Kräver att PipeWire hanterar handsfree; off gäller från nästa samtal."
+
+#: src/cli/main.cpp
+msgid ""
+"Play the iPhone's music and sounds on this computer, or keep them on the "
+"iPhone. auto leaves it to the iPhone and the audio server. Without an "
+"argument, show where it plays."
+msgstr ""
+"Spela iPhones musik och ljud på den här datorn, eller behåll dem på iPhone. "
+"auto överlåter det till iPhone och ljudservern. Utan argument visas var "
+"ljudet spelas."
 
 #: src/cli/main.cpp
 msgid "Print a redacted Bluetooth report for a bug report."
@@ -1072,6 +1082,43 @@ msgstr "Kontakterna sorteras efter efternamn."
 #: src/cli/main.cpp
 msgid "Contacts sorted by first name."
 msgstr "Kontakterna sorteras efter förnamn."
+
+#: src/cli/main.cpp
+msgid "The iPhone's audio plays on this computer."
+msgstr "iPhones ljud spelas på den här datorn."
+
+#: src/cli/main.cpp
+msgid "The iPhone's audio stays on the iPhone."
+msgstr "iPhones ljud stannar på iPhone."
+
+#: src/cli/main.cpp
+msgid ""
+"Unavailable: the iPhone is not connected over Classic, or the audio server "
+"does not offer the a2dp_sink role."
+msgstr ""
+"Inte tillgängligt: iPhone är inte ansluten via Bluetooth Classic, eller så "
+"erbjuder ljudservern inte rollen a2dp_sink."
+
+#: src/cli/main.cpp
+#, c++-format
+msgid "Remembered choice: {}"
+msgstr "Sparat val: {}"
+
+#: src/cli/main.cpp
+msgid "Expected here, phone or auto, e.g. --bt-phone-audio here\n"
+msgstr "Förväntade here, phone eller auto, t.ex. --bt-phone-audio here\n"
+
+#: src/cli/main.cpp
+msgid "The iPhone's audio comes to this computer."
+msgstr "iPhones ljud kommer till den här datorn."
+
+#: src/cli/main.cpp
+msgid "The iPhone's audio goes back to the iPhone."
+msgstr "iPhones ljud går tillbaka till iPhone."
+
+#: src/cli/main.cpp
+msgid "Phone audio follows the iPhone and the audio server."
+msgstr "Telefonens ljud följer iPhone och ljudservern."
 
 #: src/cli/main.cpp
 msgid "Expected on or off, e.g. --bt-calls-enable on\n"
@@ -2697,7 +2744,9 @@ msgstr "Ta bort tråden med %s?"
 #: src/gtk/messages_view.cpp src/tui/messages.cpp
 msgid ""
 "It stays on your iPhone, and comes back here when a new message arrives."
-msgstr "Den finns kvar på din iPhone och dyker upp här igen när ett nytt meddelande kommer."
+msgstr ""
+"Den finns kvar på din iPhone och dyker upp här igen när ett nytt meddelande "
+"kommer."
 
 #: src/gtk/messages_view.cpp
 msgid "Search conversations"
@@ -2929,6 +2978,18 @@ msgstr "Samtalsstyrning via Bluetooth"
 #: src/gtk/settings_view.cpp src/tui/settings.cpp
 msgid "Answer and place calls from the Calls tab."
 msgstr "Svara på och ring samtal från fliken Samtal."
+
+#: src/gtk/settings_view.cpp src/tui/settings.cpp
+msgid "Play the iPhone's audio on this computer"
+msgstr "Spela iPhones ljud på den här datorn"
+
+#: src/gtk/settings_view.cpp src/tui/settings.cpp
+msgid ""
+"Music and sounds from the iPhone play here. Off sends them back to the "
+"iPhone. Calls are not affected."
+msgstr ""
+"Musik och ljud från iPhone spelas här. Av skickar tillbaka dem till iPhone. "
+"Samtal påverkas inte."
 
 #: src/gtk/tray.cpp src/gtk/ui_util.cpp src/tui/main.cpp
 msgid "connected"
@@ -3226,10 +3287,6 @@ msgstr "iPhone;iOS;SMS;Meddelanden;Urklipp;Filer;Notiser;Samtal;AirPods;"
 #~ "Svara på och ring samtal från fliken Samtal. Kräver hfp_hf i bluez5.roles "
 #~ "och PipeWires telefoni-D-Bus-tjänst, som Tether inte installerar någon av."
 
-#~ msgid "Move call audio to this computer, or back to the iPhone."
-#~ msgstr ""
-#~ "Flytta samtalsljudet till den här datorn, eller tillbaka till iPhone."
-
 #~ msgid ""
 #~ "Turn call control on or off. Needs the hfp_hf role and telephony service "
 #~ "in WirePlumber; see docs/BLUETOOTH.md."
@@ -3243,9 +3300,6 @@ msgstr "iPhone;iOS;SMS;Meddelanden;Urklipp;Filer;Notiser;Samtal;AirPods;"
 #~ msgstr ""
 #~ "Spela upp samtalet i den här datorns högtalare och mikrofon. Att lämna "
 #~ "tillbaka gäller från nästa samtal."
-
-#~ msgid "Expected here or phone, e.g. --bt-call-audio here\n"
-#~ msgstr "Förväntade here eller phone, t.ex. --bt-call-audio here\n"
 
 #~ msgid ""
 #~ "New calls will stay on the iPhone. A call already playing here does not "

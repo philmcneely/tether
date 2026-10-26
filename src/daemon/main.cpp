@@ -16,6 +16,7 @@
 #include <tether/bluetooth/contacts.hpp>
 #include <tether/bluetooth/monitor.hpp>
 #include <tether/bluetooth/pairing.hpp>
+#include <tether/bluetooth/phone_audio.hpp>
 #include <tether/bluetooth/removed_threads.hpp>
 #include <tether/core.hpp>
 #include <tether/crypto.hpp>
@@ -246,6 +247,7 @@ int main(int argc, char** argv) {
     // BlueZ runs on its own GLib thread and wakes the loop through an eventfd
     // whenever the adapter or device set changes.
     tether::bluetooth::BluezMonitor bluez;
+    tether::bluetooth::PhoneAudioFollower phone_audio;
     tether::bluetooth::ConnectionManager connections(
         bluez,
         [](const nlohmann::json& status) { tether::broadcast_local_event(status.dump()); },
@@ -656,13 +658,17 @@ int main(int argc, char** argv) {
         tether::bluetooth::g_airpods = &airpods;
         tether::g_media = &media;
         media.watch(on_local_play);
-        loop.addFd(bluez.event_fd(), [&bluez, &follow_airpods](int) {
+        phone_audio.configure(tether::bluetooth::supervised_address(bt_config), bt_config.phone_audio);
+        tether::bluetooth::g_phone_audio = &phone_audio;
+        loop.addFd(bluez.event_fd(), [&bluez, &follow_airpods, &phone_audio](int) {
             bluez.drain();
             tether::broadcast_local_event(tether::build_bt_devices().dump());
             tether::broadcast_local_event(tether::build_bt_status().dump());
             follow_airpods();
+            phone_audio.update(bluez.snapshot(), bluez.connection());
         });
         follow_airpods();
+        phone_audio.update(bluez.snapshot(), bluez.connection());
         auto cap = bluez.capability();
         debug::log(INFO, "Bluetooth: {} mode", tether::bluetooth::to_string(cap.mode));
         for (const auto& reason : cap.reasons)
@@ -756,6 +762,7 @@ int main(int argc, char** argv) {
     tether::bluetooth::g_bt_connections = nullptr;
     connections.stop();
     tether::bluetooth::g_bluez = nullptr;
+    tether::bluetooth::g_phone_audio = nullptr;
     bluez.stop();
     tether::g_wayland = nullptr;
     tether::g_file_manager = nullptr;

@@ -24,6 +24,7 @@
 #include "tether/bluetooth/diagnostics.hpp"
 #include "tether/bluetooth/monitor.hpp"
 #include "tether/bluetooth/pairing.hpp"
+#include "tether/bluetooth/phone_audio.hpp"
 #include "tether/bluetooth/removed_threads.hpp"
 #include "tether/client.hpp"
 #include "tether/crypto.hpp"
@@ -437,6 +438,13 @@ namespace tether {
         status["lock_away_seconds"] = config.lock_away_seconds;
         status["yield_when_inactive"] = config.yield_when_inactive;
         status["contacts_by_last_name"] = config.contacts_by_last_name;
+        status["phone_audio"] = to_string(config.phone_audio);
+        if (bluetooth::g_bluez && bluetooth::g_bluez->running()) {
+            const auto objects = bluetooth::g_bluez->snapshot();
+            status["phone_audio_route"] = bluetooth::phone_audio_route(objects, config.device_address);
+        } else {
+            status["phone_audio_route"] = "unavailable";
+        }
         status["version"] = TETHER_VERSION;
         if (!bluetooth::g_bluez) {
             status["capability"] = nullptr;
@@ -732,6 +740,8 @@ namespace tether {
     }
 
     static void restart_supervision(bluetooth::Config config) {
+        if (bluetooth::g_phone_audio)
+            bluetooth::g_phone_audio->configure(bluetooth::supervised_address(config), config.phone_audio);
         if (bluetooth::g_bt_connections)
             bluetooth::g_bt_connections->set_device(bluetooth::supervised_address(config), config.ancs_enabled);
         broadcast_local_event(build_bt_status().dump());
@@ -1519,6 +1529,25 @@ namespace tether {
                         config.contacts_by_last_name = j.value("enabled", false);
                         bluetooth::save_config(config);
                         broadcast_local_event(build_bt_status().dump());
+                    } else if (j.contains("command") && j["command"] == "bt_set_phone_audio") {
+                        auto config = bluetooth::load_config();
+                        // "route" from the CLI, "enabled" from the TUI's switches.
+                        const std::string route =
+                            j.contains("route") ? j.value("route", "") : (j.value("enabled", false) ? "here" : "phone");
+                        config.phone_audio = bluetooth::phone_audio_from_string(route);
+                        bluetooth::save_config(config);
+                        std::thread([config] {
+                            const bool remembered = config.phone_audio != bluetooth::PhoneAudio::Auto;
+                            if (!bluetooth::install_wireplumber_rule(remembered ? config.device_address : ""))
+                                debug::log(WARN, "phone audio: could not write the WirePlumber rule");
+                            if (bluetooth::g_phone_audio) {
+                                bluetooth::g_phone_audio->configure(bluetooth::supervised_address(config),
+                                                                    config.phone_audio);
+                                if (bluetooth::g_bluez)
+                                    bluetooth::g_phone_audio->apply_now(bluetooth::g_bluez->connection());
+                            }
+                            broadcast_local_event(build_bt_status().dump());
+                        }).detach();
                     } else if (j.contains("command") && j["command"] == "bt_hold" && j.contains("profile")) {
                         if (bluetooth::g_bt_connections &&
                             bluetooth::g_bt_connections->set_hold(j.value("profile", ""), j.value("held", true)))

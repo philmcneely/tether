@@ -44,6 +44,26 @@ namespace tether::bluetooth {
         return PauseMode::Never;
     }
 
+    const char* to_string(PhoneAudio choice) {
+        switch (choice) {
+        case PhoneAudio::Auto:
+            return "auto";
+        case PhoneAudio::Here:
+            return "here";
+        case PhoneAudio::Phone:
+            return "phone";
+        }
+        return "auto";
+    }
+
+    PhoneAudio phone_audio_from_string(const std::string& value) {
+        if (value == "here")
+            return PhoneAudio::Here;
+        if (value == "phone")
+            return PhoneAudio::Phone;
+        return PhoneAudio::Auto;
+    }
+
     std::string config_path() {
         const std::filesystem::path dir = paths::config_dir();
         if (dir.empty())
@@ -75,6 +95,7 @@ namespace tether::bluetooth {
         j["yield_when_inactive"] = config.yield_when_inactive;
         j["yield_idle_seconds"] = config.yield_idle_seconds;
         j["contacts_by_last_name"] = config.contacts_by_last_name;
+        j["phone_audio"] = to_string(config.phone_audio);
         return j.dump(2);
     }
 
@@ -109,6 +130,7 @@ namespace tether::bluetooth {
             config.lock_away_seconds = std::max(1, j.value("lock_away_seconds", AWAY_LOCK_GRACE_SECONDS));
             config.lock_command = j.value("lock_command", "");
             config.contacts_by_last_name = j.value("contacts_by_last_name", false);
+            config.phone_audio = phone_audio_from_string(j.value("phone_audio", ""));
         } catch (const std::exception&) {
             // A corrupt file must not stop the daemon; defaults are safe.
         }

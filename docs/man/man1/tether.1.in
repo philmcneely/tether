@@ -218,6 +218,12 @@ flag notification mirroring requires -- and carries no audio, or PipeWire's, whi
 the call audio as well. Neither is installed by Tether and call control is unavailable,
 not broken, when there is no stack holding the profile. See \fIdocs/BLUETOOTH.md\fR.
 .TP
+\fB\-\-bt-phone-audio\fR [\fIhere\fR|\fIphone\fR|\fIauto\fR]
+Play the iPhone's music and sounds on this computer, or send them back to the iPhone, by
+opening or closing its A2DP stream. The choice is re-applied once per connection.
+\fIauto\fR forgets it. The first choice writes a WirePlumber rule and restarts WirePlumber
+once. Needs the \fBa2dp_sink\fR role. Without an argument, shows where the audio plays.
+.TP
 \fB\-\-bt-call-audio\fR \fIon\fR|\fIoff\fR
 Play call audio on this computer, or leave it on the iPhone. Only PipeWire carries the
 voice link, so this reports a refusal when BlueZ holds the profile. \fIoff\fR gates the

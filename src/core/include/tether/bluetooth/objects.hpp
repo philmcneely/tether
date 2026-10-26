@@ -18,6 +18,7 @@ namespace tether::bluetooth {
     inline constexpr const char* UUID_PBAP_PSE = "0000112f-0000-1000-8000-00805f9b34fb";
     inline constexpr const char* UUID_ANCS = "7905f431-b5ce-4e99-a40f-4b1e122d00d0";
     inline constexpr const char* UUID_A2DP_SINK = "0000110b-0000-1000-8000-00805f9b34fb";
+    inline constexpr const char* UUID_A2DP_SOURCE = "0000110a-0000-1000-8000-00805f9b34fb";
 
     // Modalias prefix for Apple's Bluetooth vendor id, shared by every Apple device.
     inline constexpr const char* MODALIAS_APPLE = "bluetooth:v004c";
@@ -32,6 +33,8 @@ namespace tether::bluetooth {
         uint32_t device_class = 0;
         bool powered = false;
         std::vector<std::string> roles;
+        // Adapter1.UUIDs: the local profiles, e.g. UUID_A2DP_SINK while the audio server offers it.
+        std::vector<std::string> uuids;
         // BlueZ's own device id, not the chip's.
         std::string modalias;
         // The controller itself, from /sys/class/bluetooth/<hciN>/device/modalias.
@@ -149,11 +152,24 @@ namespace tether::bluetooth {
         bool operator==(const Telephony&) const = default;
     };
 
+    // An open A2DP stream, from org.bluez.MediaTransport1 at <device>/sepN/fdN.
+    struct MediaTransport {
+        std::string path;
+        std::string device_path;
+        // The local role: UUID_A2DP_SINK when the phone's audio comes to this machine.
+        std::string uuid;
+        // idle, pending, broadcasting, active.
+        std::string state;
+
+        bool operator==(const MediaTransport&) const = default;
+    };
+
     struct BluezObjects {
         std::vector<Adapter> adapters;
         std::vector<Device> devices;
         std::vector<Telephony> telephony;
         std::vector<Call> calls;
+        std::vector<MediaTransport> transports;
 
         // bluetoothd has experimental API on
         bool experimental_api = false;
@@ -165,6 +181,8 @@ namespace tether::bluetooth {
         const Telephony* find_telephony(const std::string& device_path) const;
         // Calls belonging to one gateway, in path order.
         std::vector<Call> calls_for(const std::string& telephony_path) const;
+        // The stream carrying a device's audio to this machine, or null.
+        const MediaTransport* find_sink_transport(const std::string& device_path) const;
 
         bool operator==(const BluezObjects&) const = default;
     };

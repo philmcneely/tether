@@ -31,6 +31,7 @@ add_library(tether STATIC
     src/bluetooth/removed_threads.cpp
     src/bluetooth/journal.cpp
     src/bluetooth/pbap_session.cpp
+    src/bluetooth/phone_audio.cpp
     src/bluetooth/obex_transfer.cpp
     src/bluetooth/ancs/parser.cpp
     src/bluetooth/ancs/notifications.cpp

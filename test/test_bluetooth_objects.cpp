@@ -1,8 +1,12 @@
+#include "scoped_env.hpp"
 #include <gtest/gtest.h>
+
 #include <tether/bluetooth/objects.hpp>
+#include <tether/bluetooth/phone_audio.hpp>
 #include <tether/packaging.hpp>
 #include <tether/service.hpp>
 
+#include <filesystem>
 #include <sstream>
 #include <string_view>
 
@@ -998,4 +1002,71 @@ TEST(BluetoothObjects, StubBearerIsNotMistakenForAReading) {
     EXPECT_TRUE(device.has_classic_bearer) << "the interface is present, which is what confirms the bearer API";
     EXPECT_FALSE(device.classic_state_known) << "a stub carries no Connected property to believe";
     EXPECT_TRUE(device.classic_link_up()) << "with nothing to read, the aggregate is the only answer available";
+}
+
+namespace {
+
+    // Stock WirePlumber roles put A2DP sink in the adapter's UUIDs.
+    constexpr const char* ADAPTER_SINK = R"({
+      '/org/bluez/hci0': {
+        'org.bluez.Adapter1': {
+          'Address': <'02:00:00:00:00:02'>,
+          'Powered': <true>,
+          'UUIDs': <['0000110B-0000-1000-8000-00805F9B34FB']>
+        }
+      }
+    })";
+
+    // The stream ConnectProfile(0000110a) opens, under one of the phone's endpoints.
+    constexpr const char* PHONE_STREAM = R"({
+      '/org/bluez/hci0/dev_02_00_00_00_00_01/sep3/fd0': {
+        'org.bluez.MediaTransport1': {
+          'UUID': <'0000110b-0000-1000-8000-00805f9b34fb'>,
+          'State': <'active'>
+        }
+      }
+    })";
+
+} // namespace
+
+TEST(PhoneAudio, AnOpenSinkStreamMeansTheAudioPlaysHere) {
+    Payload p(join(join(ADAPTER_SINK, IPHONE_BONDED).c_str(), PHONE_STREAM).c_str());
+    auto objects = parse_managed_objects(p.v);
+
+    ASSERT_EQ(objects.transports.size(), 1u);
+    const auto* stream = objects.find_sink_transport("/org/bluez/hci0/dev_02_00_00_00_00_01");
+    ASSERT_NE(stream, nullptr);
+    EXPECT_EQ(stream->state, "active");
+    EXPECT_EQ(phone_audio_route(objects, "02:00:00:00:00:01"), "here");
+}
+
+TEST(PhoneAudio, NoStreamMeansTheAudioStaysOnThePhone) {
+    Payload p(join(ADAPTER_SINK, IPHONE_BONDED).c_str());
+    EXPECT_EQ(phone_audio_route(parse_managed_objects(p.v), "02:00:00:00:00:01"), "phone");
+}
+
+TEST(PhoneAudio, UnavailableWithoutTheSinkRole) {
+    Payload p(join(ADAPTER_FULL, IPHONE_BONDED).c_str());
+    EXPECT_EQ(phone_audio_route(parse_managed_objects(p.v), "02:00:00:00:00:01"), "unavailable");
+}
+
+TEST(PhoneAudio, RuleTurnsOffAutoConnectForThatPhoneOnly) {
+    const std::string rule = wireplumber_rule("02:00:00:00:00:01");
+    EXPECT_NE(rule.find(R"(api.bluez5.address = "02:00:00:00:00:01")"), std::string::npos);
+    EXPECT_NE(rule.find("bluez5.auto-connect = [ ]"), std::string::npos);
+}
+
+TEST(PhoneAudio, RuleRefusesAnythingButAnAddress) {
+    const auto dir = std::filesystem::temp_directory_path() / "tether-phone-audio-test";
+    std::filesystem::remove_all(dir);
+    tether::testing::ScopedEnv xdg("XDG_CONFIG_HOME", dir);
+    EXPECT_FALSE(install_wireplumber_rule("\"} ] } evil = ["));
+    EXPECT_FALSE(std::filesystem::exists(dir / "wireplumber"));
+}
+
+TEST(PhoneAudio, ChoiceSurvivesTheConfigFile) {
+    Config config;
+    config.phone_audio = PhoneAudio::Phone;
+    EXPECT_EQ(deserialize_config(serialize_config(config)).phone_audio, PhoneAudio::Phone);
+    EXPECT_EQ(deserialize_config("{}").phone_audio, PhoneAudio::Auto);
 }

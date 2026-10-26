@@ -235,6 +235,9 @@ static const Opt kOptions[] = {
     {"--bt-call-audio <on|off>",
      N_("Play call audio on this computer, or leave it on the iPhone. Needs PipeWire to be the stack holding "
         "Hands-Free; off applies from the next call.")},
+    {"--bt-phone-audio [here|phone|auto]",
+     N_("Play the iPhone's music and sounds on this computer, or keep them on the iPhone. auto leaves it to the "
+        "iPhone and the audio server. Without an argument, show where it plays.")},
     {"--bt-diagnostics", N_("Print a redacted Bluetooth report for a bug report.")},
     {"--install-extension-host",
      N_("Install the browser and mail extension's native messaging manifests for this user. Needed only for "
@@ -1482,6 +1485,10 @@ int main(int argc, char* argv[]) {
             action = "bt_call_action";
             const std::string value = i + 1 < argc ? argv[++i] : "";
             arg_val = value == "off" ? "audio_phone" : "audio_here";
+        } else if (arg == "--bt-phone-audio") {
+            action = "bt_phone_audio";
+            if (i + 1 < argc && argv[i + 1][0] != '-')
+                arg_val = argv[++i];
         } else if (arg == "--bt-call") {
             action = "bt_call";
             if (i + 1 < argc && argv[i + 1][0] != '-')
@@ -1755,6 +1762,41 @@ int main(int argc, char* argv[]) {
         fprintf(stdout,
                 "%s\n",
                 arg_val == "last" ? _("Contacts sorted by last name.") : _("Contacts sorted by first name."));
+    } else if (action == "bt_phone_audio") {
+        if (arg_val.empty()) {
+            nlohmann::json status;
+            try {
+                status = nlohmann::json::parse(client.send_and_wait("{\"command\":\"bt_status\"}\n"));
+            } catch (const std::exception&) {
+                debug::log(ERR, _("Could not read Bluetooth status from the daemon.\n"));
+                return 1;
+            }
+            const std::string route = status.value("phone_audio_route", "unavailable");
+            fprintf(stdout,
+                    "%s\n%s\n",
+                    route == "here"    ? _("The iPhone's audio plays on this computer.")
+                    : route == "phone" ? _("The iPhone's audio stays on the iPhone.")
+                                       : _("Unavailable: the iPhone is not connected over Classic, or the audio "
+                                           "server does not offer the a2dp_sink role."),
+                    tether::tr_format(_("Remembered choice: {}"), status.value("phone_audio", "auto")).c_str());
+            return 0;
+        }
+        if (arg_val != "here" && arg_val != "phone" && arg_val != "auto") {
+            debug::log(ERR, _("Expected here, phone or auto, e.g. --bt-phone-audio here\n"));
+            return 1;
+        }
+        nlohmann::json request;
+        request["command"] = "bt_set_phone_audio";
+        request["route"] = arg_val;
+        if (!client.send(request.dump() + "\n")) {
+            debug::log(ERR, _("Could not reach the daemon.\n"));
+            return 1;
+        }
+        fprintf(stdout,
+                "%s\n",
+                arg_val == "here"    ? _("The iPhone's audio comes to this computer.")
+                : arg_val == "phone" ? _("The iPhone's audio goes back to the iPhone.")
+                                     : _("Phone audio follows the iPhone and the audio server."));
     } else if (action == "bt_calls_enable") {
         if (arg_val != "on" && arg_val != "off") {
             debug::log(ERR, _("Expected on or off, e.g. --bt-calls-enable on\n"));

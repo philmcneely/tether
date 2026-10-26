@@ -17,6 +17,7 @@ namespace tether::bluetooth {
         constexpr const char* IFACE_DEVICE = "org.bluez.Device1";
         constexpr const char* IFACE_TELEPHONY = "org.bluez.Telephony1";
         constexpr const char* IFACE_CALL = "org.bluez.Call1";
+        constexpr const char* IFACE_MEDIA_TRANSPORT = "org.bluez.MediaTransport1";
         constexpr const char* IFACE_LE_ADV_MGR = "org.bluez.LEAdvertisingManager1";
         constexpr const char* IFACE_ADV_MONITOR_MGR = "org.bluez.AdvertisementMonitorManager1";
         constexpr const char* IFACE_BEARER_LE = "org.bluez.Bearer.LE1";
@@ -174,6 +175,7 @@ namespace tether::bluetooth {
             a.device_class = get_uint32(props, "Class");
             a.powered = get_bool(props, "Powered");
             a.roles = get_strv(props, "Roles");
+            a.uuids = get_strv(props, "UUIDs");
             a.modalias = get_string(props, "Modalias");
             a.controller = controller_of(path);
             g_variant_unref(props);
@@ -232,6 +234,21 @@ namespace tether::bluetooth {
             g_variant_unref(props);
 
             out.calls.push_back(std::move(c));
+        }
+
+        void read_transport(const std::string& path, GVariant* ifaces, BluezObjects& out) {
+            GVariant* props = g_variant_lookup_value(ifaces, IFACE_MEDIA_TRANSPORT, G_VARIANT_TYPE("a{sv}"));
+            if (!props)
+                return;
+
+            MediaTransport t;
+            t.path = path;
+            t.device_path = parent_path(parent_path(path));
+            t.uuid = get_string(props, "UUID");
+            t.state = get_string(props, "State");
+            g_variant_unref(props);
+
+            out.transports.push_back(std::move(t));
         }
 
         void read_device(const std::string& path, GVariant* ifaces, BluezObjects& out) {
@@ -345,6 +362,15 @@ namespace tether::bluetooth {
         return out;
     }
 
+    const MediaTransport* BluezObjects::find_sink_transport(const std::string& device_path) const {
+        if (device_path.empty())
+            return nullptr;
+        auto it = std::find_if(transports.begin(), transports.end(), [&](const MediaTransport& t) {
+            return t.device_path == device_path && iequals(t.uuid, UUID_A2DP_SINK);
+        });
+        return it == transports.end() ? nullptr : &*it;
+    }
+
     const char* to_string(DeliveryMode mode) {
         switch (mode) {
         case DeliveryMode::Full:
@@ -393,6 +419,7 @@ namespace tether::bluetooth {
             read_device(path, ifaces, out);
             read_telephony(path, ifaces, out);
             read_call(path, ifaces, out);
+            read_transport(path, ifaces, out);
 
             GVariant* chr = g_variant_lookup_value(ifaces, IFACE_CHARACTERISTIC, G_VARIANT_TYPE("a{sv}"));
             if (!chr)
@@ -436,6 +463,9 @@ namespace tether::bluetooth {
             return a.path < b.path;
         });
         std::sort(out.calls.begin(), out.calls.end(), [](const Call& a, const Call& b) { return a.path < b.path; });
+        std::sort(out.transports.begin(), out.transports.end(), [](const MediaTransport& a, const MediaTransport& b) {
+            return a.path < b.path;
+        });
         return out;
     }
 

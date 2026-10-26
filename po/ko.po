@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tether\n"
 "Report-Msgid-Bugs-To: zack@bartel.com\n"
-"POT-Creation-Date: 2026-10-25 10:20-0700\n"
+"POT-Creation-Date: 2026-10-25 20:55-0700\n"
 "PO-Revision-Date: 2026-08-23\n"
 "Last-Translator: Tether project\n"
 "Language-Team: Korean\n"
@@ -242,6 +242,15 @@ msgid ""
 msgstr ""
 "통화 오디오를 이 컴퓨터에서 재생하거나 iPhone에 그대로 둡니다. PipeWire가 핸"
 "즈프리를 처리하고 있어야 하며, off는 다음 통화부터 적용됩니다."
+
+#: src/cli/main.cpp
+msgid ""
+"Play the iPhone's music and sounds on this computer, or keep them on the "
+"iPhone. auto leaves it to the iPhone and the audio server. Without an "
+"argument, show where it plays."
+msgstr ""
+"iPhone의 음악과 소리를 이 컴퓨터에서 재생하거나 iPhone에 둡니다. auto는 "
+"iPhone과 오디오 서버에 맡깁니다. 인수가 없으면 재생 위치를 표시합니다."
 
 #: src/cli/main.cpp
 msgid "Print a redacted Bluetooth report for a bug report."
@@ -1056,6 +1065,43 @@ msgstr "연락처를 성으로 정렬했습니다."
 #: src/cli/main.cpp
 msgid "Contacts sorted by first name."
 msgstr "연락처를 이름으로 정렬했습니다."
+
+#: src/cli/main.cpp
+msgid "The iPhone's audio plays on this computer."
+msgstr "iPhone 오디오가 이 컴퓨터에서 재생됩니다."
+
+#: src/cli/main.cpp
+msgid "The iPhone's audio stays on the iPhone."
+msgstr "iPhone 오디오가 iPhone에 남아 있습니다."
+
+#: src/cli/main.cpp
+msgid ""
+"Unavailable: the iPhone is not connected over Classic, or the audio server "
+"does not offer the a2dp_sink role."
+msgstr ""
+"사용할 수 없음: iPhone이 Bluetooth Classic으로 연결되어 있지 않거나 오디오 서"
+"버가 a2dp_sink 역할을 제공하지 않습니다."
+
+#: src/cli/main.cpp
+#, c++-format
+msgid "Remembered choice: {}"
+msgstr "기억된 선택: {}"
+
+#: src/cli/main.cpp
+msgid "Expected here, phone or auto, e.g. --bt-phone-audio here\n"
+msgstr "here, phone 또는 auto가 필요합니다. 예: --bt-phone-audio here\n"
+
+#: src/cli/main.cpp
+msgid "The iPhone's audio comes to this computer."
+msgstr "iPhone 오디오가 이 컴퓨터로 옵니다."
+
+#: src/cli/main.cpp
+msgid "The iPhone's audio goes back to the iPhone."
+msgstr "iPhone 오디오가 iPhone으로 돌아갑니다."
+
+#: src/cli/main.cpp
+msgid "Phone audio follows the iPhone and the audio server."
+msgstr "휴대폰 오디오는 iPhone과 오디오 서버를 따릅니다."
 
 #: src/cli/main.cpp
 msgid "Expected on or off, e.g. --bt-calls-enable on\n"
@@ -2661,7 +2707,8 @@ msgstr "%s 님과의 대화를 목록에서 제거할까요?"
 #: src/gtk/messages_view.cpp src/tui/messages.cpp
 msgid ""
 "It stays on your iPhone, and comes back here when a new message arrives."
-msgstr "iPhone에는 그대로 남아 있으며, 새 메시지가 오면 여기에 다시 표시됩니다."
+msgstr ""
+"iPhone에는 그대로 남아 있으며, 새 메시지가 오면 여기에 다시 표시됩니다."
 
 #: src/gtk/messages_view.cpp
 msgid "Search conversations"
@@ -2889,6 +2936,18 @@ msgstr "Bluetooth 통화 제어"
 #: src/gtk/settings_view.cpp src/tui/settings.cpp
 msgid "Answer and place calls from the Calls tab."
 msgstr "통화 탭에서 전화를 받고 걸 수 있습니다."
+
+#: src/gtk/settings_view.cpp src/tui/settings.cpp
+msgid "Play the iPhone's audio on this computer"
+msgstr "이 컴퓨터에서 iPhone 오디오 재생"
+
+#: src/gtk/settings_view.cpp src/tui/settings.cpp
+msgid ""
+"Music and sounds from the iPhone play here. Off sends them back to the "
+"iPhone. Calls are not affected."
+msgstr ""
+"iPhone의 음악과 소리가 여기에서 재생됩니다. 끄면 iPhone으로 돌아갑니다. 통화"
+"에는 영향이 없습니다."
 
 #: src/gtk/tray.cpp src/gtk/ui_util.cpp src/tui/main.cpp
 msgid "connected"
@@ -3185,9 +3244,6 @@ msgstr "iPhone;iOS;SMS;메시지;클립보드;파일;알림;통화;AirPods;"
 #~ "통화 탭에서 전화를 받고 걸 수 있습니다. bluez5.roles의 hfp_hf와 PipeWire"
 #~ "의 텔레포니 D-Bus 서비스가 필요하며, 둘 다 Tether가 설치하지 않습니다."
 
-#~ msgid "Move call audio to this computer, or back to the iPhone."
-#~ msgstr "통화 오디오를 이 컴퓨터로 옮기거나 iPhone으로 되돌립니다."
-
 #~ msgid ""
 #~ "Turn call control on or off. Needs the hfp_hf role and telephony service "
 #~ "in WirePlumber; see docs/BLUETOOTH.md."
@@ -3201,9 +3257,6 @@ msgstr "iPhone;iOS;SMS;메시지;클립보드;파일;알림;통화;AirPods;"
 #~ msgstr ""
 #~ "이 컴퓨터의 스피커와 마이크로 통화합니다. 되돌리기는 다음 통화부터 적용됩"
 #~ "니다."
-
-#~ msgid "Expected here or phone, e.g. --bt-call-audio here\n"
-#~ msgstr "here 또는 phone이 필요합니다. 예: --bt-call-audio here\n"
 
 #~ msgid ""
 #~ "New calls will stay on the iPhone. A call already playing here does not "
