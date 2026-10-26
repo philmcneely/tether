@@ -381,7 +381,7 @@ final class TetherViewModel {
 
             do {
                 let fileData = try Data(contentsOf: url)
-                self.sendFile(data: fileData, filename: filename)
+                await self.sendFile(data: fileData, filename: filename)
             } catch {
                 await MainActor.run {
                     self.errorMessage = "File transfer failed: \(error.localizedDescription)"
@@ -428,11 +428,12 @@ final class TetherViewModel {
                     let end = min(offset + self.fileChunkSize, fileData.count)
                     let chunk = fileData[offset..<end]
                     let base64 = chunk.base64EncodedString()
+                    let index = chunkIndex
 
                     await MainActor.run {
                         self.connection.send(.fileChunk(
                             transferId: transferId,
-                            chunkIndex: chunkIndex,
+                            chunkIndex: index,
                             data: base64
                         ))
 
