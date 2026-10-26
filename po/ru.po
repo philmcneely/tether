@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tether\n"
 "Report-Msgid-Bugs-To: zack@bartel.com\n"
-"POT-Creation-Date: 2026-10-25 10:20-0700\n"
+"POT-Creation-Date: 2026-10-25 20:55-0700\n"
 "PO-Revision-Date: 2026-08-23\n"
 "Last-Translator: Tether project\n"
 "Language-Team: Russian\n"
@@ -246,6 +246,16 @@ msgstr ""
 "Воспроизводить звук вызова на этом компьютере или оставить его на iPhone. "
 "Требуется, чтобы Hands-Free обслуживал PipeWire; off действует со следующего "
 "вызова."
+
+#: src/cli/main.cpp
+msgid ""
+"Play the iPhone's music and sounds on this computer, or keep them on the "
+"iPhone. auto leaves it to the iPhone and the audio server. Without an "
+"argument, show where it plays."
+msgstr ""
+"Воспроизводить музыку и звуки iPhone на этом компьютере или оставить их на "
+"iPhone. auto оставляет выбор за iPhone и звуковым сервером. Без аргумента "
+"показывает, где идёт звук."
 
 #: src/cli/main.cpp
 msgid "Print a redacted Bluetooth report for a bug report."
@@ -1087,6 +1097,43 @@ msgstr "Контакты отсортированы по фамилии."
 #: src/cli/main.cpp
 msgid "Contacts sorted by first name."
 msgstr "Контакты отсортированы по имени."
+
+#: src/cli/main.cpp
+msgid "The iPhone's audio plays on this computer."
+msgstr "Звук iPhone воспроизводится на этом компьютере."
+
+#: src/cli/main.cpp
+msgid "The iPhone's audio stays on the iPhone."
+msgstr "Звук iPhone остаётся на iPhone."
+
+#: src/cli/main.cpp
+msgid ""
+"Unavailable: the iPhone is not connected over Classic, or the audio server "
+"does not offer the a2dp_sink role."
+msgstr ""
+"Недоступно: iPhone не подключён по Bluetooth Classic, или звуковой сервер не "
+"предлагает роль a2dp_sink."
+
+#: src/cli/main.cpp
+#, c++-format
+msgid "Remembered choice: {}"
+msgstr "Запомненный выбор: {}"
+
+#: src/cli/main.cpp
+msgid "Expected here, phone or auto, e.g. --bt-phone-audio here\n"
+msgstr "Ожидалось here, phone или auto, например --bt-phone-audio here\n"
+
+#: src/cli/main.cpp
+msgid "The iPhone's audio comes to this computer."
+msgstr "Звук iPhone переходит на этот компьютер."
+
+#: src/cli/main.cpp
+msgid "The iPhone's audio goes back to the iPhone."
+msgstr "Звук iPhone возвращается на iPhone."
+
+#: src/cli/main.cpp
+msgid "Phone audio follows the iPhone and the audio server."
+msgstr "Звук телефона определяют iPhone и звуковой сервер."
 
 #: src/cli/main.cpp
 msgid "Expected on or off, e.g. --bt-calls-enable on\n"
@@ -2726,7 +2773,8 @@ msgstr "Убрать переписку с %s?"
 #: src/gtk/messages_view.cpp src/tui/messages.cpp
 msgid ""
 "It stays on your iPhone, and comes back here when a new message arrives."
-msgstr "Она останется на iPhone и снова появится здесь, когда придёт новое сообщение."
+msgstr ""
+"Она останется на iPhone и снова появится здесь, когда придёт новое сообщение."
 
 #: src/gtk/messages_view.cpp
 msgid "Search conversations"
@@ -2961,6 +3009,18 @@ msgstr "Управление вызовами по Bluetooth"
 msgid "Answer and place calls from the Calls tab."
 msgstr "Отвечайте на вызовы и звоните на вкладке «Вызовы»."
 
+#: src/gtk/settings_view.cpp src/tui/settings.cpp
+msgid "Play the iPhone's audio on this computer"
+msgstr "Воспроизводить звук iPhone на этом компьютере"
+
+#: src/gtk/settings_view.cpp src/tui/settings.cpp
+msgid ""
+"Music and sounds from the iPhone play here. Off sends them back to the "
+"iPhone. Calls are not affected."
+msgstr ""
+"Музыка и звуки iPhone воспроизводятся здесь. Выключение возвращает их на "
+"iPhone. Звонки не затрагиваются."
+
 #: src/gtk/tray.cpp src/gtk/ui_util.cpp src/tui/main.cpp
 msgid "connected"
 msgstr "подключено"
@@ -3059,7 +3119,8 @@ msgstr "Новое сообщение или набор номера во вкл
 
 #: src/tui/main.cpp
 msgid "Dismiss, forget, unpair, hang up, or remove a conversation"
-msgstr "Скрыть, забыть, разорвать сопряжение, завершить звонок или убрать переписку"
+msgstr ""
+"Скрыть, забыть, разорвать сопряжение, завершить звонок или убрать переписку"
 
 #: src/tui/main.cpp
 msgid "Copy the highlighted address or text"
@@ -3259,9 +3320,6 @@ msgstr ""
 #~ "bluez5.roles и служба телефонии D-Bus из PipeWire; Tether не "
 #~ "устанавливает ни то, ни другое."
 
-#~ msgid "Move call audio to this computer, or back to the iPhone."
-#~ msgstr "Перевести звук вызова на этот компьютер или обратно на iPhone."
-
 #~ msgid ""
 #~ "Turn call control on or off. Needs the hfp_hf role and telephony service "
 #~ "in WirePlumber; see docs/BLUETOOTH.md."
@@ -3275,9 +3333,6 @@ msgstr ""
 #~ msgstr ""
 #~ "Воспроизводить вызов через динамики и микрофон этого компьютера. Возврат "
 #~ "действует со следующего вызова."
-
-#~ msgid "Expected here or phone, e.g. --bt-call-audio here\n"
-#~ msgstr "Ожидалось here или phone, например --bt-call-audio here\n"
 
 #~ msgid ""
 #~ "New calls will stay on the iPhone. A call already playing here does not "

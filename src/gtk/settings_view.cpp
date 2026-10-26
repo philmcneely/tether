@@ -39,6 +39,7 @@ namespace tether::ui {
 
             GtkWidget* row_calls = nullptr;
             GtkWidget* sw_calls = nullptr;
+            GtkWidget* sw_phone_audio = nullptr;
 
             GtkWidget* sw_lock_away = nullptr;
 
@@ -155,6 +156,11 @@ namespace tether::ui {
             daemon_send({{"command", "bt_set_calls"}, {"enabled", gtk_switch_get_active(widget) == TRUE}});
         }
 
+        void on_phone_audio_toggled(GtkSwitch* widget, GParamSpec*, gpointer) {
+            daemon_send({{"command", "bt_set_phone_audio"},
+                         {"route", gtk_switch_get_active(widget) == TRUE ? "here" : "phone"}});
+        }
+
         void on_lock_away_toggled(GtkSwitch* widget, GParamSpec*, gpointer) {
             daemon_send({{"command", "bt_set_lock_on_away"}, {"enabled", gtk_switch_get_active(widget) == TRUE}});
         }
@@ -200,6 +206,12 @@ namespace tether::ui {
             set_switch(g_settings.sw_calls,
                        reinterpret_cast<gpointer>(on_calls_toggled),
                        status.value("calls_enabled", false));
+
+            // The live route wins, so a change made on the iPhone shows here too.
+            const std::string route = status.value("phone_audio_route", "unavailable");
+            set_switch(g_settings.sw_phone_audio,
+                       reinterpret_cast<gpointer>(on_phone_audio_toggled),
+                       route == "unavailable" ? status.value("phone_audio", "auto") == "here" : route == "here");
 
             // Popups cover Wi-Fi file transfers too, so this one never depends on a bond.
             const bool popups_on = status.value("desktop_popups_enabled", true);
@@ -395,6 +407,14 @@ namespace tether::ui {
                                            _("Call control over Bluetooth"),
                                            _("Answer and place calls from the Calls tab."),
                                            g_settings.sw_calls);
+
+            g_settings.sw_phone_audio = new_switch();
+            g_signal_connect(g_settings.sw_phone_audio, "notify::active", G_CALLBACK(on_phone_audio_toggled), nullptr);
+            add_row(experimental,
+                    _("Play the iPhone's audio on this computer"),
+                    _("Music and sounds from the iPhone play here. Off sends them back to the iPhone. Calls are "
+                      "not affected."),
+                    g_settings.sw_phone_audio);
 
             sync_from_status();
         }

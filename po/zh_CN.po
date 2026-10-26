@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tether\n"
 "Report-Msgid-Bugs-To: zack@bartel.com\n"
-"POT-Creation-Date: 2026-10-25 10:20-0700\n"
+"POT-Creation-Date: 2026-10-25 20:55-0700\n"
 "PO-Revision-Date: 2026-08-23\n"
 "Last-Translator: Tether project\n"
 "Language-Team: Simplified Chinese\n"
@@ -231,6 +231,15 @@ msgid ""
 msgstr ""
 "在本机播放通话音频，或将其留在 iPhone 上。需要由 PipeWire 承载免提；off 从下"
 "一通电话起生效。"
+
+#: src/cli/main.cpp
+msgid ""
+"Play the iPhone's music and sounds on this computer, or keep them on the "
+"iPhone. auto leaves it to the iPhone and the audio server. Without an "
+"argument, show where it plays."
+msgstr ""
+"在这台电脑上播放 iPhone 的音乐和声音，或将其留在 iPhone 上。auto 交由 iPhone "
+"和音频服务器决定。不带参数时，显示声音在哪里播放。"
 
 #: src/cli/main.cpp
 msgid "Print a redacted Bluetooth report for a bug report."
@@ -1032,6 +1041,41 @@ msgstr "联系人已按姓氏排列。"
 #: src/cli/main.cpp
 msgid "Contacts sorted by first name."
 msgstr "联系人已按名字排列。"
+
+#: src/cli/main.cpp
+msgid "The iPhone's audio plays on this computer."
+msgstr "iPhone 的声音在这台电脑上播放。"
+
+#: src/cli/main.cpp
+msgid "The iPhone's audio stays on the iPhone."
+msgstr "iPhone 的声音留在 iPhone 上。"
+
+#: src/cli/main.cpp
+msgid ""
+"Unavailable: the iPhone is not connected over Classic, or the audio server "
+"does not offer the a2dp_sink role."
+msgstr "不可用：iPhone 未通过经典蓝牙连接，或音频服务器未提供 a2dp_sink 角色。"
+
+#: src/cli/main.cpp
+#, c++-format
+msgid "Remembered choice: {}"
+msgstr "记住的选择：{}"
+
+#: src/cli/main.cpp
+msgid "Expected here, phone or auto, e.g. --bt-phone-audio here\n"
+msgstr "应为 here、phone 或 auto，例如 --bt-phone-audio here\n"
+
+#: src/cli/main.cpp
+msgid "The iPhone's audio comes to this computer."
+msgstr "iPhone 的声音转到这台电脑。"
+
+#: src/cli/main.cpp
+msgid "The iPhone's audio goes back to the iPhone."
+msgstr "iPhone 的声音回到 iPhone。"
+
+#: src/cli/main.cpp
+msgid "Phone audio follows the iPhone and the audio server."
+msgstr "手机声音由 iPhone 和音频服务器决定。"
 
 #: src/cli/main.cpp
 msgid "Expected on or off, e.g. --bt-calls-enable on\n"
@@ -2819,6 +2863,16 @@ msgstr "通过蓝牙控制通话"
 msgid "Answer and place calls from the Calls tab."
 msgstr "在“通话”标签页接听和拨打电话。"
 
+#: src/gtk/settings_view.cpp src/tui/settings.cpp
+msgid "Play the iPhone's audio on this computer"
+msgstr "在这台电脑上播放 iPhone 的声音"
+
+#: src/gtk/settings_view.cpp src/tui/settings.cpp
+msgid ""
+"Music and sounds from the iPhone play here. Off sends them back to the "
+"iPhone. Calls are not affected."
+msgstr "iPhone 的音乐和声音在这里播放。关闭后送回 iPhone。通话不受影响。"
+
 #: src/gtk/tray.cpp src/gtk/ui_util.cpp src/tui/main.cpp
 msgid "connected"
 msgstr "已连接"
@@ -3111,9 +3165,6 @@ msgstr "iPhone;iOS;SMS;信息;剪贴板;文件;通知;通话;AirPods;"
 #~ "在“通话”标签页接听和拨打电话。需要 bluez5.roles 中的 hfp_hf 以及 PipeWire "
 #~ "的电话 D-Bus 服务，Tether 两者都不会安装。"
 
-#~ msgid "Move call audio to this computer, or back to the iPhone."
-#~ msgstr "将通话音频转到本机，或转回 iPhone。"
-
 #~ msgid ""
 #~ "Turn call control on or off. Needs the hfp_hf role and telephony service "
 #~ "in WirePlumber; see docs/BLUETOOTH.md."
@@ -3125,9 +3176,6 @@ msgstr "iPhone;iOS;SMS;信息;剪贴板;文件;通知;通话;AirPods;"
 #~ "Play the call through this computer's speakers and microphone. Handing it "
 #~ "back applies to the next call."
 #~ msgstr "通过本机的扬声器和麦克风进行通话。转回将从下一通电话开始生效。"
-
-#~ msgid "Expected here or phone, e.g. --bt-call-audio here\n"
-#~ msgstr "应为 here 或 phone，例如 --bt-call-audio here\n"
 
 #~ msgid ""
 #~ "New calls will stay on the iPhone. A call already playing here does not "

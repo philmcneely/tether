@@ -1059,6 +1059,30 @@ call audio on the desktop, `a2dp_sink` is mandatory for it, and with it the phon
 sounds come here too, and AirPods handoff falls back to the computer; see "Getting the call audio
 onto the desktop instead".
 
+#### Switching it instead
+
+To keep `a2dp_sink` and choose per moment, leave the roles alone (drop only `hfp_hf` if you want
+call control) and use:
+
+```bash
+tether --bt-phone-audio here    # play the iPhone's music and sounds on this computer
+tether --bt-phone-audio phone   # back to the iPhone
+tether --bt-phone-audio auto    # forget the choice; iPhone and audio server decide
+tether --bt-phone-audio         # where it plays now
+```
+
+The same switch is under Settings > Experimental in the GTK and terminal clients. It opens or closes
+the iPhone's A2DP stream (`Device1.ConnectProfile`/`DisconnectProfile` on `0000110a`); PipeWire is not
+restarted. The first `here` or `phone` writes
+`~/.config/wireplumber/wireplumber.conf.d/zz-tether-phone-audio.conf`, which turns off WirePlumber's
+`bluez5.auto-connect` for this phone only, and restarts WirePlumber once. `auto` removes it. WirePlumber
+0.4 ignores the file.
+
+The iPhone reopens the stream itself about a second after every reconnect. With `phone` chosen, Tether
+closes it once per connection, within the first 30 seconds; with `here`, it opens the stream 5 seconds
+in if the iPhone has not. A route picked on the iPhone after that is left alone. Closing the stream
+pauses what the iPhone was playing, as unplugging headphones does. See 2026-10-25.
+
 Two things that look like fixes and are not:
 
 - `pactl set-card-profile bluez_card.<ADDR> off` stops the computer playing the audio,
@@ -3771,3 +3795,31 @@ Asked to remove messages deleted on the phone. Not possible on a live session:
 Inferring deletes from absence was tried and reverted. Treating a short listing as the whole folder
 removed 128 messages that were still on the phone, and the journal rewrite made that permanent.
 Whether a new MAP session drops the deleted message is unverified.
+
+### 2026-10-25 - The iPhone's audio can be switched without changing roles
+
+[blueferry](https://github.com/erikwb/blueferry) keeps `a2dp_sink` and switches the iPhone's media
+audio with `Device1.ConnectProfile`/`DisconnectProfile("0000110a-...")`. Checked here on WirePlumber
+0.5.18, bluez 5.87, iPhone 15 Pro:
+
+- `a2dp_sink` added back, plus a `monitor.bluez.rules` entry giving this phone
+  `bluez5.auto-connect = [ ]`, then WirePlumber restarted: no stream opened. The role alone does not
+  move the audio; WirePlumber's own dial does.
+- `ConnectProfile`: `<device>/sep3/fd0` (`MediaTransport1`, UUID `0000110b`) and `bluez_card` appear,
+  and the audio moves here. `DisconnectProfile`: both go, the Classic link stays up, and the audio
+  goes back to the phone.
+- `Device1.Connect` on the live link does not reopen the stream.
+- Bluetooth off and on on the iPhone: the stream came back about a second after the link (bluetoothd
+  logged `Device is already marked as connected`, and Tether made no connect call). The iPhone opens
+  it, so the rule is not enough by itself.
+- Closing it once after that reconnect held for 60 s.
+
+So `--bt-phone-audio` acts once per connection and does not fight a later choice made on the iPhone.
+
+Closing too early breaks the device. `MediaTransport1` appears at SetConfiguration, before AVDTP Open
+completes. A `DisconnectProfile` sent in that gap logged `avdtp.c:cancel_request() Open: Operation
+canceled` and `Transaction label doesn't match`. After that, every `ConnectProfile` on the phone,
+for any UUID, returned `br-connection-busy` until the BR/EDR bearer was disconnected. The automatic
+close now waits 3 s after the stream appears.
+Unchecked: AirPods handed back to this machine while the stream is closed, which is the fallback
+described under "Keeping the phone's audio on the phone".

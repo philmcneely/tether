@@ -75,6 +75,14 @@ namespace tether::tui {
              "bt_set_contacts_by_last_name",
              "contacts_by_last_name",
              false},
+            {"phoneaudio",
+             N_("Experimental"),
+             N_("Play the iPhone's audio on this computer"),
+             N_("Music and sounds from the iPhone play here. Off sends them back to the iPhone. Calls are not "
+                "affected."),
+             "bt_set_phone_audio",
+             "phone_audio",
+             false},
             {"calls",
              N_("Experimental"),
              N_("Call control over Bluetooth"),
@@ -221,7 +229,14 @@ namespace tether::tui {
                 return nullptr;
             }
 
-            bool value(const Setting& setting) const { return status_.value(setting.status_key, setting.fallback); }
+            bool value(const Setting& setting) const {
+                // The live route wins, so a change made on the iPhone shows here too.
+                if (std::string(setting.id) == "phoneaudio") {
+                    const std::string route = status_.value("phone_audio_route", "unavailable");
+                    return route == "unavailable" ? status_.value("phone_audio", "auto") == "here" : route == "here";
+                }
+                return status_.value(setting.status_key, setting.fallback);
+            }
 
             // Which rows can change depends on the bond, as in the GTK settings.
             bool usable(const Setting& setting) const {
@@ -229,7 +244,7 @@ namespace tether::tui {
                 const bool bonded = !status_.value("device_address", std::string()).empty();
                 const bool bt_on = status_.value("enabled", true);
                 const std::string id = setting.id;
-                if (id == "ancs" || id == "calls")
+                if (id == "ancs" || id == "calls" || id == "phoneaudio")
                     return available && bonded && bt_on;
                 if (id == "content")
                     return available && bonded && bt_on && status_.value("ancs_enabled", true);

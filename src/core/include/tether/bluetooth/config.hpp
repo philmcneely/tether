@@ -28,6 +28,12 @@ namespace tether::bluetooth {
     const char* to_string(PauseMode mode);
     PauseMode pause_mode_from_string(const std::string& value);
 
+    // Where the iPhone's media audio plays. Auto leaves it to the iPhone and the audio server.
+    enum class PhoneAudio { Auto, Here, Phone };
+
+    const char* to_string(PhoneAudio choice);
+    PhoneAudio phone_audio_from_string(const std::string& value);
+
     // Persisted at ~/.config/tether/bluetooth.json.
     struct Config {
         // Address of the selected iPhone, e.g. "02:00:00:00:00:04".
@@ -75,6 +81,8 @@ namespace tether::bluetooth {
         std::string lock_command;
         // Whether contacts list by last name rather than first.
         bool contacts_by_last_name = false;
+        // Applied to device_address once per Classic connection.
+        PhoneAudio phone_audio = PhoneAudio::Auto;
 
         bool operator==(const Config&) const = default;
     };
