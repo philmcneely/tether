@@ -1054,6 +1054,9 @@ for a phone, and leaving them out leaves the iPhone nothing to route to. Leaving
 also what hands BlueZ the hands-free profile, which is where call control and the indicators come
 from -- see "Calls".
 
+These roles leave out `a2dp_sink`, so `tether --bt-phone-audio` reports `unavailable` and its switch
+does nothing. To keep the choice, see "Switching it instead" below.
+
 The one thing given up is the phone using the computer as a speaker or speakerphone. If you want
 call audio on the desktop, `a2dp_sink` is mandatory for it, and with it the phone's music and
 sounds come here too, and AirPods handoff falls back to the computer; see "Getting the call audio
@@ -1061,8 +1064,20 @@ onto the desktop instead".
 
 #### Switching it instead
 
-To keep `a2dp_sink` and choose per moment, leave the roles alone (drop only `hfp_hf` if you want
-call control) and use:
+To keep `a2dp_sink` and choose each time, use the stock roles without `hfp_hf`. Dropping `hfp_hf` keeps
+call control on BlueZ; see "Calls". On WirePlumber 0.5 and later:
+
+```bash
+mkdir -p ~/.config/wireplumber/wireplumber.conf.d
+cat > ~/.config/wireplumber/wireplumber.conf.d/51-no-phone-audio.conf <<'EOF'
+monitor.bluez.properties = {
+  bluez5.roles = [ a2dp_sink a2dp_source bap_sink bap_source bap_bcast_sink bap_bcast_source hfp_ag ]
+}
+EOF
+systemctl --user restart wireplumber
+```
+
+This replaces the file above if you made it. As there, only one file should set `bluez5.roles`. Then:
 
 ```bash
 tether --bt-phone-audio here    # play the iPhone's music and sounds on this computer

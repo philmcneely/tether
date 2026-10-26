@@ -60,7 +60,10 @@ Place, answer and end calls on the iPhone from the desktop, complete with caller
 Recent calls from the iPhone are listed with a button to call back, and the iPhone's favorites are starred at the top of Contacts. These need **Phone Recents** and **Phone Favorites** turned on under the iPhone's Bluetooth settings for this computer.
 The call audio stays on the iPhone. If you've used Linux long enough you know why (it sounds like "FalsePotty-o"). PulsAlsaWire is too hard to support across all deployment targets.
 
-Stock PipeWire makes the computer a speaker for the phone, which takes call control away and moves the iPhone's music and sounds to the desktop. The recommended audio setting is in [Keeping the phone's audio on the phone](docs/BLUETOOTH.md#keeping-the-phones-audio-on-the-phone). Or keep it and switch with `tether --bt-phone-audio here|phone`.
+Out of the box, Linux offers itself to the iPhone as a Bluetooth speaker. The iPhone's music and sounds then play on the computer, and call control stops working. One small audio setting fixes it, and you pick which way:
+
+- **Keep the iPhone's sound on the iPhone, always.** See [Keeping the phone's audio on the phone](docs/BLUETOOTH.md#keeping-the-phones-audio-on-the-phone).
+- **Switch whenever you like.** Settings > Experimental > *Play the iPhone's audio on this computer*, or `tether --bt-phone-audio here` and `tether --bt-phone-audio phone`. See [Switching it instead](docs/BLUETOOTH.md#switching-it-instead).
 
 ### OTP Handling
 Streamline two-factor authentication across your devices:
