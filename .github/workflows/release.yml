@@ -139,6 +139,7 @@ jobs:
   copr:
     needs: [package]
     if: github.ref_type == 'tag'
+    continue-on-error: true
     runs-on: ubuntu-latest
     container: fedora:latest
     steps:
@@ -151,7 +152,7 @@ jobs:
           mkdir -p ~/.config
           printf '%s\n' "$COPR_CONFIG" > ~/.config/copr
           copr-cli buildscm zackb/tether --clone-url "https://github.com/$GITHUB_REPOSITORY.git" \
-            --commit "$TAG" --method make_srpm
+            --commit "$TAG" --method make_srpm --nowait
 
   release:
     needs: [package, appimage, flatpak]
