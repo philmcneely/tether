@@ -118,6 +118,10 @@ final class ShareViewController: UIViewController {
 
         // 4. Image (in-memory UIImage or URL-backed)
         if provider.hasItemConformingToTypeIdentifier(UTType.image.identifier) {
+            // prefer the original encoding (heic)
+            if let original = await loadOriginalImage(provider) {
+                return original
+            }
             return await withCheckedContinuation { continuation in
                 provider.loadItem(forTypeIdentifier: UTType.image.identifier, options: nil) { item, _ in
                     if let image = item as? UIImage, let data = image.jpegData(compressionQuality: 0.9) {
@@ -193,6 +197,45 @@ final class ShareViewController: UIViewController {
                 }
             }
         }
+    }
+
+    /// Loads the provider's original image representation as-is. Photos lists
+    /// a JPEG compatibility rendition first (e.g. `public.jpeg`,
+    /// `com.apple.live-photo`, `public.heic`), so prefer any non-JPEG image
+    /// type and only fall back to JPEG. Returns `nil` if it can't be loaded.
+    private static func loadOriginalImage(_ provider: NSItemProvider) async -> SharedItem? {
+        let imageTypes = provider.registeredTypeIdentifiers
+            .compactMap { UTType($0) }
+            .filter { $0.conforms(to: .image) && $0 != .livePhoto }
+        guard let type = imageTypes.first(where: { $0 != .jpeg }) ?? imageTypes.first
+        else { return nil }
+        let suggestedName = provider.suggestedName
+
+        return await withCheckedContinuation { continuation in
+            _ = provider.loadFileRepresentation(forTypeIdentifier: type.identifier) { url, _ in
+                // temp file is deleted once this handler returns, so read it here.
+                guard let url, let data = try? Data(contentsOf: url), !data.isEmpty else {
+                    continuation.resume(returning: nil)
+                    return
+                }
+                continuation.resume(returning: .file(data, filename: imageFilename(
+                    suggestedName: suggestedName, type: type, fallback: url.lastPathComponent
+                )))
+            }
+        }
+    }
+
+    /// `suggestedName` with the extension for `type`. Only a trailing image
+    /// extension is replaced, so dotted names like "Screenshot at 10.30.15"
+    /// keep their full stem.
+    private static func imageFilename(suggestedName: String?, type: UTType, fallback: String) -> String {
+        guard let name = suggestedName, !name.isEmpty,
+              let ext = type.preferredFilenameExtension
+        else { return fallback }
+        let nsName = name as NSString
+        let hasImageExt = UTType(filenameExtension: nsName.pathExtension)?.conforms(to: .image) == true
+        let stem = hasImageExt ? nsName.deletingPathExtension : name
+        return "\(stem).\(ext)"
     }
 
     /// Reads the contents of a (possibly security-scoped) file URL into a
