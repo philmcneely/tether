@@ -485,6 +485,17 @@ If something can't be reached with the keyboard, is read wrongly by a screen rea
 
 The manual checks run before a release are in [docs/ACCESSIBILITY.md](docs/ACCESSIBILITY.md).
 
+Colors come from your GTK theme. You can override tether specific elements in `~/.config/gtk-3.0/gtk.css` and restart the app.
+
+Example:
+
+```css
+.tether-bubble-out { background-color: #0b5cad; color: #ffffff; }
+.tether-bubble-in  { background-color: #e9e9eb; color: #000000; }
+.tether-bubble label { font-family: "Inter"; }
+```
+
+
 ## Security
 
 Report security findings privately through
