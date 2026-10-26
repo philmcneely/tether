@@ -476,6 +476,7 @@ Keyboard shortcuts in the desktop app:
 | Ctrl+N | New message |
 | Ctrl+F | Search conversations |
 | Ctrl+, | Settings |
+| Ctrl++ / Ctrl+- / Ctrl+0 | Larger text, smaller text, reset |
 | Escape | Close Settings, leave search |
 | Ctrl+W | Close window |
 | Ctrl+Q | Quit |
