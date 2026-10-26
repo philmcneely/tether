@@ -122,6 +122,12 @@ final class ShareViewController: UIViewController {
             if let original = await loadOriginalImage(provider) {
                 return original
             }
+            // Instant Markup (screenshot editor) hands back raw encoded bytes;
+            // name them after the provider's first image type.
+            let ext = provider.registeredTypeIdentifiers
+                .compactMap { UTType($0) }
+                .first { $0.conforms(to: .image) }?
+                .preferredFilenameExtension ?? "png"
             return await withCheckedContinuation { continuation in
                 provider.loadItem(forTypeIdentifier: UTType.image.identifier, options: nil) { item, _ in
                     if let image = item as? UIImage, let data = image.jpegData(compressionQuality: 0.9) {
@@ -129,11 +135,6 @@ final class ShareViewController: UIViewController {
                     } else if let url = item as? URL {
                         continuation.resume(returning: readFile(at: url, defaultFilename: "image.jpg"))
                     } else if let data = item as? Data {
-                        // Instant Markup (screenshot editor) hands back raw encoded bytes.
-                        let ext = provider.registeredTypeIdentifiers
-                            .compactMap { UTType($0) }
-                            .first { $0.conforms(to: .image) }?
-                            .preferredFilenameExtension ?? "png"
                         continuation.resume(returning: .file(data, filename: "image.\(ext)"))
                     } else {
                         continuation.resume(returning: nil)
@@ -546,7 +547,7 @@ private struct ShareSheetView: View {
             Image(systemName: failed ? "xmark.circle.fill" : "checkmark.circle.fill")
                 .font(.system(size: 48))
                 .foregroundStyle(failed ? .red : .green)
-                .symbolEffect(.bounce, isActive: !reduceMotion)
+                .modifier(BounceEffect(isActive: !reduceMotion))
                 .accessibilityHidden(true)
             Text(message)
                 .multilineTextAlignment(.center)
@@ -697,5 +698,18 @@ private struct ActionButton: View {
             )
         }
         .buttonStyle(.plain)
+    }
+}
+
+// Indefinite bounce needs iOS 18; the extension still supports iOS 17.
+private struct BounceEffect: ViewModifier {
+    let isActive: Bool
+
+    func body(content: Content) -> some View {
+        if #available(iOS 18.0, *) {
+            content.symbolEffect(.bounce, isActive: isActive)
+        } else {
+            content
+        }
     }
 }
