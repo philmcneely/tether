@@ -10,6 +10,8 @@
 #include "tray.hpp"
 #include "ui_util.hpp"
 
+#include <algorithm>
+#include <cmath>
 #include <csignal>
 #include <filesystem>
 #include <glib-unix.h>
@@ -167,11 +169,36 @@ namespace {
         gtk_stack_set_visible_child_name(GTK_STACK(g_stack), name);
     }
 
+    // Text zoom scales gtk-xft-dpi, which every pt/em/% font size
+    void apply_text_zoom(double zoom) {
+        zoom = std::clamp(std::round(zoom * 10) / 10, 0.5, 2.0);
+        prefs()["text_zoom"] = zoom;
+
+        static bool overridden = false;
+        GtkSettings* settings = gtk_settings_get_default();
+        if (!settings || (zoom == 1.0 && !overridden))
+            return;
+        overridden = true;
+        gtk_settings_reset_property(settings, "gtk-xft-dpi");
+        int dpi = 0;
+        g_object_get(settings, "gtk-xft-dpi", &dpi, nullptr);
+        if (dpi <= 0)
+            dpi = 96 * 1024;
+        g_object_set(settings, "gtk-xft-dpi", static_cast<int>(dpi * zoom), nullptr);
+    }
+
+    void step_text_zoom(double delta) {
+        apply_text_zoom(prefs().value("text_zoom", 1.0) + delta);
+        prefs_save();
+    }
+
     void install_actions(GtkApplication* app, GtkWidget* window) {
         struct Accel {
             const char* name;
             const char* key;
             void (*run)();
+            const char* alt_key = nullptr;
+            const char* alt_key2 = nullptr;
         };
         static const Accel accels[] = {
             {"new-message",
@@ -205,6 +232,15 @@ namespace {
                  if (GtkWidget* w = main_window())
                      gtk_window_close(GTK_WINDOW(w));
              }},
+            {"zoom-in", "<Control>plus", [] { step_text_zoom(0.1); }, "<Control>equal", "<Control>KP_Add"},
+            {"zoom-out", "<Control>minus", [] { step_text_zoom(-0.1); }, "<Control>KP_Subtract"},
+            {"zoom-reset",
+             "<Control>0",
+             [] {
+                 apply_text_zoom(1.0);
+                 prefs_save();
+             },
+             "<Control>KP_0"},
         };
 
         for (const Accel& accel : accels) {
@@ -218,7 +254,7 @@ namespace {
             g_object_unref(action);
 
             const std::string detailed = std::string("win.") + accel.name;
-            const char* keys[] = {accel.key, nullptr};
+            const char* keys[] = {accel.key, accel.alt_key, accel.alt_key2, nullptr};
             gtk_application_set_accels_for_action(app, detailed.c_str(), keys);
         }
     }
@@ -232,6 +268,7 @@ namespace {
         tether::Crypto::instance().init();
         install_style();
         follow_system_color_scheme();
+        apply_text_zoom(prefs().value("text_zoom", 1.0));
 
         GtkWidget* window = gtk_application_window_new(app);
         gtk_window_set_title(GTK_WINDOW(window), _("Tether"));

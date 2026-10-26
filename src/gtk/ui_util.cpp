@@ -40,8 +40,8 @@ namespace tether::ui {
 .tether-nav-item:checked { background-color: alpha(@theme_selected_bg_color, 0.20); color: @theme_fg_color; font-weight: bold; }
 .tether-app headerbar { min-height: 42px; box-shadow: none; border-bottom: 1px solid alpha(@theme_fg_color, 0.08); }
 .tether-page-header { padding: 22px 24px; border-bottom: 1px solid alpha(@theme_fg_color, 0.08); }
-.tether-page-title { font-size: 22px; font-weight: bold; }
-.tether-hero-title { font-size: 23px; font-weight: bold; }
+.tether-page-title { font-size: 16.5pt; font-weight: bold; }
+.tether-hero-title { font-size: 17.25pt; font-weight: bold; }
 .tether-hero-icon { color: @theme_selected_bg_color; background-color: alpha(@theme_selected_bg_color, 0.10); border-radius: 20px; padding: 18px; }
 .tether-card { background-color: mix(@theme_bg_color, @theme_fg_color, 0.045); border: 1px solid alpha(@theme_fg_color, 0.09); border-radius: 16px; padding: 22px; }
 .tether-detail { margin: 24px; }
@@ -50,7 +50,7 @@ namespace tether::ui {
 .tether-app .tether-list row { padding: 0; margin: 3px 0; border-radius: 12px; border: 1px solid transparent; }
 .tether-app .tether-list row:hover { background-color: alpha(@theme_fg_color, 0.055); }
 .tether-app .tether-list row:selected { background-color: alpha(@theme_selected_bg_color, 0.14); border-color: alpha(@theme_selected_bg_color, 0.28); color: @theme_fg_color; }
-.tether-avatar { min-width: 36px; min-height: 36px; border-radius: 24px; background-color: alpha(@theme_selected_bg_color, 0.15); color: @theme_fg_color; font-size: 16px; font-weight: bold; }
+.tether-avatar { min-width: 36px; min-height: 36px; border-radius: 24px; background-color: alpha(@theme_selected_bg_color, 0.15); color: @theme_fg_color; font-size: 12pt; font-weight: bold; }
 .tether-app .tether-feed { padding: 12px 24px 24px; }
 .tether-app .tether-feed row { background-color: mix(@theme_bg_color, @theme_fg_color, 0.035); border: 1px solid alpha(@theme_fg_color, 0.09); border-radius: 14px; margin: 0 0 10px; padding: 8px; }
 .tether-app entry { border-radius: 10px; min-height: 34px; box-shadow: none; }
@@ -147,7 +147,7 @@ namespace tether::ui {
     box-shadow: 0 4px 16px alpha(black, 0.3), 0 0 0 1px alpha(@theme_fg_color, 0.12);
 }
 .tether-picker { padding: 20px 24px; }
-.tether-picker-title { font-size: 17px; font-weight: bold; }
+.tether-picker-title { font-size: 12.75pt; font-weight: bold; }
 .tether-picker-tile {
     min-width: 128px;
     min-height: 128px;
