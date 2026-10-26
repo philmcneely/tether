@@ -136,6 +136,23 @@ jobs:
           path: build/flatpak/*.flatpak
           if-no-files-found: error
 
+  copr:
+    needs: [package]
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    container: fedora:latest
+    steps:
+      - name: build in COPR
+        env:
+          COPR_CONFIG: ${{ secrets.COPR_CONFIG }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          dnf install -y copr-cli
+          mkdir -p ~/.config
+          printf '%s\n' "$COPR_CONFIG" > ~/.config/copr
+          copr-cli buildscm zackb/tether --clone-url "https://github.com/$GITHUB_REPOSITORY.git" \
+            --commit "$TAG" --method make_srpm
+
   release:
     needs: [package, appimage, flatpak]
     if: github.ref_type == 'tag'

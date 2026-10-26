@@ -95,6 +95,23 @@ The extension communicates with `tetherd` via native messaging. This allows user
 yay -S tether
 ```
 
+### Fedora
+
+```bash
+sudo dnf copr enable zackb/tether
+sudo dnf install tether
+```
+
+Update with `dnf upgrade`. 
+
+On Fedora Atomic (Silverblue, Kinoite, Bazzite):
+
+```bash
+curl -fsSL "https://copr.fedorainfracloud.org/coprs/zackb/tether/repo/fedora-$(rpm -E %fedora)/zackb-tether-fedora-$(rpm -E %fedora).repo" \
+  | sudo tee /etc/yum.repos.d/zackb-tether.repo
+rpm-ostree install tether
+```
+
 ### AppImage
 
 One file, no install, for distros without a package and for immutable systems.
