@@ -4,6 +4,7 @@
 #include <glib.h>
 #include <regex>
 #include <tether/i18n.hpp>
+#include <tether/psl.hpp>
 
 namespace tether::ui {
 
@@ -54,7 +55,8 @@ namespace tether::ui {
     } // namespace
 
     std::string linkify_markup(const std::string& body) {
-        static const std::regex pattern(R"((https?://|www\.)[^\s<>"']+)", std::regex::icase);
+        static const std::regex pattern(R"(((https?://|www\.)[^\s<>"']+)|[a-z0-9-]+(\.[a-z0-9-]+)+(/[^\s<>"']*)?)",
+                                        std::regex::icase);
 
         std::string out;
         auto begin = std::sregex_iterator(body.begin(), body.end(), pattern);
@@ -70,9 +72,21 @@ namespace tether::ui {
             url.resize(keep);
 
             const size_t at = static_cast<size_t>(match.position());
+            std::string href;
+            if (match[1].matched) {
+                // bare www. host is not a URI
+                href = (url.compare(0, 4, "www.") == 0) ? "http://" + url : url;
+            } else {
+                // bare host linkify only a real tld and not an email address
+                const std::string host = url.substr(0, url.find('/'));
+                const char before = at > 0 ? body[at - 1] : ' ';
+                const size_t after = at + match.length();
+                if (before == '@' || before == '.' || before == '/' || before == '_' ||
+                    (after < body.size() && body[after] == '@') || !is_known_tld(host.substr(host.rfind('.') + 1)))
+                    continue;
+                href = "https://" + url;
+            }
             out += escape(body.substr(cursor, at - cursor));
-            // bare www. host is not a URI
-            const std::string href = (url.compare(0, 4, "www.") == 0) ? "http://" + url : url;
             out += "<a href=\"" + escape(href) + "\">" + escape(url) + "</a>";
             cursor = at + keep;
         }

@@ -58,6 +58,23 @@ TEST(LinkifyMarkup, MultipleUrlsInOneBody) {
               "<a href=\"http://a.test\">http://a.test</a> and <a href=\"http://b.test\">http://b.test</a>");
 }
 
+TEST(LinkifyMarkup, BareDomainGetsHttps) {
+    EXPECT_EQ(linkify_markup("try github.com/zackb/tether."),
+              "try <a href=\"https://github.com/zackb/tether\">github.com/zackb/tether</a>.");
+    EXPECT_EQ(linkify_markup("news.ycombinator.com"),
+              "<a href=\"https://news.ycombinator.com\">news.ycombinator.com</a>");
+}
+
+TEST(LinkifyMarkup, NonTldDottedTextStaysText) {
+    EXPECT_EQ(linkify_markup("open file.txt"), "open file.txt");
+    EXPECT_EQ(linkify_markup("v1.2.3"), "v1.2.3");
+    EXPECT_EQ(linkify_markup("e.g. this"), "e.g. this");
+}
+
+TEST(LinkifyMarkup, EmailAddressIsNotLinked) {
+    EXPECT_EQ(linkify_markup("mail first.last@example.com"), "mail first.last@example.com");
+}
+
 TEST_F(FixedZone, TodayIsAClockTime) { EXPECT_EQ(format_thread_time(NOW - 3600, NOW), "11:00"); }
 
 TEST_F(FixedZone, EarlierTodayStaysAClockTime) {
