@@ -1102,8 +1102,28 @@ namespace tether::bluetooth {
                 const int ready = wait_for(fd, wake_fd, POLLIN, std::max(timeout, 0));
                 if (ready == 0) {
                     drain_wake();
+                    bool taking = false;
+                    {
+                        std::lock_guard<std::mutex> lock(mutex);
+                        taking = pending_take_over;
+                    }
                     if (!send_pending(fd, hosts))
                         break;
+                    // The hijack asks the others to stop, so their last reports no longer hold: a peer
+                    // has to report playing and get the audio routed to it again before this one yields.
+                    if (taking) {
+                        std::string local;
+                        {
+                            std::lock_guard<std::mutex> lock(mutex);
+                            local = local_address;
+                            state.peer_audio = false;
+                            state.peer_call = false;
+                            state.peer_holds_audio = false;
+                        }
+                        std::erase_if(reports, [&](const auto& entry) { return entry.first != local; });
+                        peer_holds_audio = false;
+                        publish(delivered ? AirPodsStatus::Live : AirPodsStatus::Connecting, "");
+                    }
                     continue;
                 }
                 if (ready == -2)
@@ -1250,7 +1270,7 @@ namespace tether::bluetooth {
                                message->streaming ? (*message->streaming ? "yes" : "no") : "-",
                                message->category ? std::to_string(*message->category) : "-",
                                message->set_ownership_to_false ? ", set ownership to false" : "");
-                    if (message->streaming)
+                    if (message->decisive())
                         reports[message->sender] = *message;
 
                     std::string local;

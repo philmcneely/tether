@@ -195,6 +195,8 @@ namespace tether::bluetooth {
         // A call or media is actually playing; a route with nothing on it reports YES with category 100.
         bool playing() const { return streaming.value_or(false) && category.value_or(0) > AUDIO_CATEGORY_NONE; }
         bool call() const { return streaming.value_or(false) && category == AUDIO_CATEGORY_CALL; }
+        // Says whether the host plays
+        bool decisive() const { return streaming == false || playing(); }
     };
 
     // Returns no value for anything that is not one, or whose body does not decode.
