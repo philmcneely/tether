@@ -1,4 +1,5 @@
 #include "tether/otp.hpp"
+#include "tether/psl.hpp"
 
 #include <algorithm>
 #include <cctype>
@@ -178,6 +179,12 @@ namespace tether {
             return registrable_domain(host) == registrable_domain(d);
         }
     } // namespace
+
+    bool is_known_tld(const std::string& label) {
+        const std::string tld = normalize_domain(label);
+        const PslSets& sets = psl_sets();
+        return !tld.empty() && (sets.normal.count(tld) != 0 || sets.wildcard.count(tld) != 0);
+    }
 
     uint64_t otp_store(const std::string& code, const std::string& sender_domain, OtpClock::time_point now) {
         std::lock_guard<std::mutex> lock(g_mutex);
