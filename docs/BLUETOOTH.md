@@ -723,12 +723,16 @@ above. No timer decides anything, and it does not need call control.
   call report still holds *this* machine's claims back (`takes_over_for_play()`), and losing the
   owner bit still pauses local playback on the spot, so nothing reaches the speakers while the
   phone takes over.
-- **The phone reporting `NO` takes them back**, and resumes what the release paused.
+- **The phone reporting `NO` takes them back**, and resumes what the release paused. `YES` with
+  category `100` decides nothing (`SmartRoutingMessage::decisive()`): the iPhone sends it in the
+  middle of its own takeover.
 - **A player starting here takes them**, wherever they are, unless the phone is on a call. MPRIS
   `PropertiesChanged` drives it (`MediaControl::watch()`). With the card down the player is paused
   on the signal, the card comes back, and it resumes -- the pause is what keeps it off the
   speakers. The claim goes with a media report saying something plays here and a hijack request,
-  which the iPhone answers with `NO`. Players that leave `PlaybackStatus` empty (Chromium without
+  which the iPhone answers with `NO`. The take-over forgets every other host's report and
+  `peer_holds_audio`, so a peer has to report playing and get the audio again before this machine
+  lets go. Players that leave `PlaybackStatus` empty (Chromium without
   Plasma Browser Integration) are not seen.
 - **A yield request from another host** releases at once, without waiting for the verdict.
 - **Losing the owner bit pauses local playback** on the spot, whoever took it.
@@ -3838,3 +3842,45 @@ for any UUID, returned `br-connection-busy` until the BR/EDR bearer was disconne
 close now waits 3 s after the stream appears.
 Unchecked: AirPods handed back to this machine while the stream is closed, which is the fallback
 described under "Keeping the phone's audio on the phone".
+
+### 2026-10-26 - Linux and the iPhone handed the buds back and forth (#212)
+
+Reported in #212 as a speaker blast on handoff. Reproduced here as a stuck play button. Pro 3 and
+iPhone, `tetherd.log` 20:17-20:21. Every extra release/reclaim cycle switches the card and sends
+MPRIS pause/resume again, so each one is another chance for a blast.
+
+**`YES 100` read as the phone stopping.** It came between the phone's `YES 301` reports while the
+phone took the buds. That happened after 7 of 14 releases:
+
+```
+20:20:25.416  gave the buds to the other host
+20:20:25.465  iPhone  Unknown YES 100        claim sent
+20:20:25.467  iPhone  com.apple.Music YES 301
+20:20:26.553  took the buds back             the phone is still playing
+```
+
+**A take-over kept the phone's old report.** `reports` still held `YES 301` and `peer_holds_audio`
+stayed latched, so `peer_busy()` released the moment the reclaim finished, before the phone said
+anything new:
+
+```
+20:19:45.002  took the buds back
+20:19:45.438  gave the buds to the other host (paused 0)
+```
+
+With a game holding category `201`, the two stacked and the hosts swapped about
+once a second. Now only a decisive report is stored, and a take-over clears the peer state.
+
+Not changed: the blast a single real phone takeover can still cause. The phone takes the transport
+before a pause can land (see 2026-09-12).
+
+Verified on hardware the same evening (20:36-20:37): Music handoff in both directions with no
+extra cycles. A game still swaps: on each Linux take-over the game sends `NO 201`, then within a
+second `audioRoutingSetOwnershipToFalse` and `YES 201`. That is the phone taking the buds back,
+and Tether only follows it, so it is left alone. A call ending sent `YES 100` and then `NO 100`,
+and `peer_call` cleared.
+
+Open: a call that rang while Linux played media (20:38:09, `YES 501`) never got a claim from the
+phone. iOS put it on this computer's hands-free link until the user picked AirPods on the phone
+19 s later. This change does not touch that path. Whether it happened before this change is not
+yet known.

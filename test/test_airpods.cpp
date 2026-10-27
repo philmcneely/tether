@@ -372,6 +372,17 @@ TEST(AirPods, ReadsTheIPhonesSmartRoutingReports) {
     route.category = AUDIO_CATEGORY_NONE;
     EXPECT_FALSE(route.playing());
 
+    // It comes mid-route-change and decides nothing; NO or something playing does.
+    EXPECT_FALSE(route.decisive());
+    EXPECT_FALSE(yield->decisive());
+    route.streaming = false;
+    EXPECT_TRUE(route.decisive());
+    route.streaming = true;
+    route.category = AUDIO_CATEGORY_MEDIA;
+    EXPECT_TRUE(route.decisive());
+    route.category = AUDIO_CATEGORY_CALL;
+    EXPECT_TRUE(route.decisive());
+
     auto truncated = IPHONE_YIELD_REQUEST;
     truncated.pop_back();
     EXPECT_FALSE(routing(truncated).has_value());
