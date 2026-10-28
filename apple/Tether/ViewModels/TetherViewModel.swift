@@ -873,6 +873,9 @@ final class TetherViewModel {
                 errorMessage = "Allow camera access for Tether in Settings to stream."
                 return
             }
+            // The session may have dropped while the permission prompt was up.
+            guard appState == .connected, daemonCameraPort == port,
+                  connection.serverFingerprint == fingerprint else { return }
             camera.start(host: host, port: port, pinnedFingerprint: fingerprint,
                          identity: identity, position: position)
         }

@@ -665,8 +665,10 @@ own TLS connection, not the main session, so video never delays other messages.
    fingerprint here.
 2. Its first line is `camera_start`. The daemon answers nothing; an unpaired session gets
    the usual `unauthorized` error, and a daemon without camera support closes the connection.
-3. Everything after that line is binary frames until the connection closes, which removes
-   the node. A new `camera_start` replaces any stream already running.
+3. Everything after that line is binary frames until the connection closes. The node then
+   stays and shows black, so apps keep it selected for the next stream. A new `camera_start`
+   replaces any stream already running. The daemon sends nothing on success, so any line it
+   sends on this connection is an `error`.
 
 ```json
 {"command": "camera_start", "codec": "h264", "width": 1920, "height": 1080, "fps": 30}

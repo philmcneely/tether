@@ -24,8 +24,13 @@ public final class CameraStreamer: NSObject {
     // The camera feeding `session`, for rotating a preview to match.
     public private(set) var device: AVCaptureDevice?
 
+    // Bumped on main by start() and stop(), so a failure from an earlier stream
+    // cannot mark the current one stopped.
+    @ObservationIgnored private var streamID = 0
+
     // Everything below is confined to `queue`.
     private let queue = DispatchQueue(label: "tether.camera")
+    @ObservationIgnored private var activeStreamID = 0
     @ObservationIgnored private var connection: NWConnection?
     @ObservationIgnored private var encoder: VTCompressionSession?
     // Turns frames upright and pillarboxes portrait ones into the encoder's landscape size.
@@ -51,6 +56,8 @@ public final class CameraStreamer: NSObject {
         position: AVCaptureDevice.Position = .back
     ) {
         stop()
+        streamID += 1
+        let id = streamID
         lastError = nil
         isStreaming = true
 
@@ -66,6 +73,7 @@ public final class CameraStreamer: NSObject {
             switch state {
             case .ready:
                 self.sendStart(on: conn)
+                self.receiveReplies(on: conn)
                 self.startCapture(position: position)
             case .failed(let error):
                 self.fail(error.localizedDescription)
@@ -77,6 +85,7 @@ public final class CameraStreamer: NSObject {
             }
         }
         queue.async {
+            self.activeStreamID = id
             self.connection = conn
             self.pending = 0
             conn.start(queue: self.queue)
@@ -84,6 +93,7 @@ public final class CameraStreamer: NSObject {
     }
 
     public func stop() {
+        streamID += 1
         isStreaming = false
         queue.async { self.teardown() }
     }
@@ -91,8 +101,10 @@ public final class CameraStreamer: NSObject {
     // MARK: - Private
 
     private func fail(_ message: String) {
+        let id = activeStreamID
         teardown()
         DispatchQueue.main.async {
+            guard self.streamID == id else { return }
             self.lastError = message
             self.isStreaming = false
         }
@@ -118,6 +130,22 @@ public final class CameraStreamer: NSObject {
         guard var line = try? JSONSerialization.data(withJSONObject: start) else { return }
         line.append(0x0A)
         conn.send(content: line, completion: .contentProcessed { _ in })
+    }
+
+    // tetherd sends nothing while a stream is healthy, so any reply is an error.
+    private func receiveReplies(on conn: NWConnection) {
+        conn.receive(minimumIncompleteLength: 1, maximumLength: 4096) { [weak self] data, _, isComplete, error in
+            guard let self, self.connection === conn else { return }
+            if let data, !data.isEmpty {
+                let line = data.prefix { $0 != 0x0A }
+                let reply = try? JSONDecoder().decode(TetherMessage.self, from: line)
+                self.fail(reply?.message ?? "The desktop refused the camera stream")
+            } else if let error {
+                self.fail(error.localizedDescription)
+            } else if isComplete {
+                self.fail("The desktop ended the camera stream")
+            }
+        }
     }
 
     private func startCapture(position: AVCaptureDevice.Position) {

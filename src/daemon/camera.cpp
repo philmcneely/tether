@@ -10,6 +10,7 @@
 #include <spa/param/buffers.h>
 #include <spa/param/video/format-utils.h>
 #include <sys/socket.h>
+#include <system_error>
 #include <tether/log.hpp>
 #include <thread>
 #include <unistd.h>
@@ -211,10 +212,15 @@ namespace tether {
             } else {
                 debug::log(INFO, "camera: streaming \"{}\"", description);
                 char rbuf[65536];
+                // A replaced stream must stop feeding the shared node, even from frames it already holds.
+                const auto superseded = [fd] {
+                    std::lock_guard lock(g_active_mutex);
+                    return g_active_fd != fd;
+                };
                 for (;;) {
                     CameraFrame f;
-                    long n;
-                    while ((n = parse_camera_frame(buf, f)) > 0) {
+                    long n = 0;
+                    while (!superseded() && (n = parse_camera_frame(buf, f)) > 0) {
                         if (av_new_packet(pkt.get(), int(f.payload.size())) == 0) {
                             std::memcpy(pkt->data, f.payload.data(), f.payload.size());
                             avcodec_send_packet(ctx.get(), pkt.get());
@@ -262,23 +268,41 @@ namespace tether {
 
     } // namespace
 
+    bool camera_supported() { return avcodec_find_decoder(AV_CODEC_ID_H264) != nullptr; }
+
+    // Must not throw: the caller has already handed over fd and ssl and forgotten them.
     void start_camera_stream(
         int fd, SSL* ssl, const nlohmann::json& start, std::string leftover, const std::string& device_name) {
-        if (start.value("codec", "h264") != "h264") {
-            debug::log(ERR, "camera: unsupported codec {}", start.value("codec", ""));
+        const auto codec = start.find("codec");
+        if (codec != start.end() && !(codec->is_string() && *codec == "h264")) {
+            debug::log(ERR, "camera: unsupported codec {}", codec->dump());
             SSL_free(ssl);
             close(fd);
             return;
         }
+        const auto fps_field = start.find("fps");
+        const int fps =
+            fps_field != start.end() && fps_field->is_number_integer() ? std::clamp(fps_field->get<int>(), 1, 120) : 30;
+        std::string description = (device_name.empty() ? std::string("iPhone") : device_name) + " Camera";
+
+        int replaced = -1;
         {
             std::lock_guard lock(g_active_mutex);
-            if (g_active_fd >= 0)
-                shutdown(g_active_fd, SHUT_RDWR);
+            replaced = g_active_fd;
             g_active_fd = fd;
         }
-        const int fps = std::clamp(start.value("fps", 30), 1, 120);
-        std::string description = (device_name.empty() ? std::string("iPhone") : device_name) + " Camera";
-        std::thread(run_stream, fd, ssl, std::move(leftover), std::move(description), fps).detach();
+        try {
+            std::thread(run_stream, fd, ssl, std::move(leftover), std::move(description), fps).detach();
+        } catch (const std::system_error& e) {
+            debug::log(ERR, "camera: could not start the stream thread: {}", e.what());
+            std::lock_guard lock(g_active_mutex);
+            g_active_fd = replaced;
+            SSL_free(ssl);
+            close(fd);
+            return;
+        }
+        if (replaced >= 0)
+            shutdown(replaced, SHUT_RDWR);
     }
 
 } // namespace tether
