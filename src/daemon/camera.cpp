@@ -31,7 +31,7 @@ namespace tether {
         class PipeWireCamera {
         public:
             PipeWireCamera(const std::string& description, int width, int height, int fps)
-                : width_(width), height_(height) {
+                : description_(description), width_(width), height_(height) {
                 static std::once_flag init;
                 std::call_once(init, [] { pw_init(nullptr, nullptr); });
 
@@ -88,7 +88,9 @@ namespace tether {
             PipeWireCamera(const PipeWireCamera&) = delete;
             PipeWireCamera& operator=(const PipeWireCamera&) = delete;
 
-            bool matches(const AVFrame* f) const { return f->width == width_ && f->height == height_; }
+            bool matches(const AVFrame* f, const std::string& description) const {
+                return f->width == width_ && f->height == height_ && description == description_;
+            }
 
             void push(const AVFrame* f) {
                 std::vector<uint8_t> i420(size_t(width_) * height_ * 3 / 2);
@@ -99,7 +101,19 @@ namespace tether {
                     for (int y = 0; y < h; ++y, out += w)
                         std::memcpy(out, f->data[plane] + size_t(y) * f->linesize[plane], w);
                 }
+                submit(std::move(i420));
+            }
 
+            // Shown between streams so viewers do not keep the last picture.
+            void push_black() {
+                const size_t luma = size_t(width_) * height_;
+                std::vector<uint8_t> i420(luma * 3 / 2, 128);
+                std::fill_n(i420.begin(), luma, 16);
+                submit(std::move(i420));
+            }
+
+        private:
+            void submit(std::vector<uint8_t> i420) {
                 pw_thread_loop_lock(loop_);
                 pending_.swap(i420);
                 if (streaming_)
@@ -107,7 +121,6 @@ namespace tether {
                 pw_thread_loop_unlock(loop_);
             }
 
-        private:
             static void on_state_changed(void* data, pw_stream_state, pw_stream_state state, const char* error) {
                 auto* self = static_cast<PipeWireCamera*>(data);
                 self->streaming_ = state == PW_STREAM_STATE_STREAMING;
@@ -159,6 +172,7 @@ namespace tether {
                 pw_stream_queue_buffer(self->stream_, b);
             }
 
+            const std::string description_;
             const int width_;
             const int height_;
             pw_thread_loop* loop_ = nullptr;
@@ -168,6 +182,9 @@ namespace tether {
             bool streaming_ = false;
             std::vector<uint8_t> pending_;
         };
+
+        std::mutex g_camera_mutex;
+        PipeWireCamera* g_camera = nullptr;
 
         struct CodecDeleter {
             void operator()(AVCodecContext* c) const { avcodec_free_context(&c); }
@@ -185,7 +202,6 @@ namespace tether {
                 avcodec_alloc_context3(avcodec_find_decoder(AV_CODEC_ID_H264)));
             std::unique_ptr<AVPacket, CodecDeleter> pkt(av_packet_alloc());
             std::unique_ptr<AVFrame, CodecDeleter> frame(av_frame_alloc());
-            std::unique_ptr<PipeWireCamera> camera;
 
             if (ctx) {
                 ctx->flags |= AV_CODEC_FLAG_LOW_DELAY;
@@ -205,14 +221,14 @@ namespace tether {
                             av_packet_unref(pkt.get());
                         }
                         while (avcodec_receive_frame(ctx.get(), frame.get()) == 0) {
-                            // ponytail: VideoToolbox only sends 8-bit 4:2:0; add swscale if another format shows up
                             if (frame->format != AV_PIX_FMT_YUV420P && frame->format != AV_PIX_FMT_YUVJ420P)
                                 continue;
-                            // ponytail: a size change recreates the node; apps may need to reselect it
-                            if (!camera || !camera->matches(frame.get()))
-                                camera =
-                                    std::make_unique<PipeWireCamera>(description, frame->width, frame->height, fps);
-                            camera->push(frame.get());
+                            std::lock_guard lock(g_camera_mutex);
+                            if (!g_camera || !g_camera->matches(frame.get(), description)) {
+                                delete g_camera;
+                                g_camera = new PipeWireCamera(description, frame->width, frame->height, fps);
+                            }
+                            g_camera->push(frame.get());
                         }
                         buf.erase(0, size_t(n));
                     }
@@ -228,11 +244,17 @@ namespace tether {
                 debug::log(INFO, "camera: stream ended");
             }
 
-            camera.reset();
+            bool replaced;
             {
                 std::lock_guard lock(g_active_mutex);
-                if (g_active_fd == fd)
+                replaced = g_active_fd != fd;
+                if (!replaced)
                     g_active_fd = -1;
+            }
+            if (!replaced) {
+                std::lock_guard lock(g_camera_mutex);
+                if (g_camera)
+                    g_camera->push_black();
             }
             SSL_free(ssl);
             close(fd);
