@@ -1,4 +1,5 @@
 #include "../src/ui_common/message_format.hpp"
+#include "../src/ui_common/ui_text.hpp"
 
 #include <glib.h>
 #include <gtest/gtest.h>
@@ -150,4 +151,14 @@ TEST(LinkifyMarkup, AlwaysProducesParseableMarkup) {
         g_clear_error(&error);
         g_markup_parse_context_free(context);
     }
+}
+
+TEST(PhoneStatusText, BatteryAloneThenWithTheCellularLink) {
+    using tether::ui::phone_status_text;
+    EXPECT_EQ(phone_status_text(nlohmann::json{{"battery", 89}, {"calls", nullptr}}), "89%");
+    EXPECT_EQ(phone_status_text(nlohmann::json{{"battery", nullptr}, {"calls", nullptr}}), "");
+    const nlohmann::json calls = {
+        {"available", true}, {"indicators", true}, {"operator", "Carrier"}, {"service", true}, {"signal", 3}};
+    EXPECT_EQ(phone_status_text(nlohmann::json{{"battery", 89}, {"calls", calls}}), "89%  Carrier  ▆▆▆▁▁");
+    EXPECT_EQ(phone_status_text(nlohmann::json{{"battery", nullptr}, {"calls", calls}}), "Carrier  ▆▆▆▁▁");
 }

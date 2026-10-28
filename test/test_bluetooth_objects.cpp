@@ -246,6 +246,22 @@ TEST(BluetoothObjects, BondedFallsBackToPaired) {
     EXPECT_TRUE(objects.devices[0].bonded);
 }
 
+TEST(BluetoothObjects, ReadsBatteryPercentage) {
+    Payload p(R"({
+      '/org/bluez/hci0/dev_AA': {
+        'org.bluez.Device1': { 'Address': <'AA'> },
+        'org.bluez.Battery1': { 'Percentage': <byte 89> }
+      },
+      '/org/bluez/hci0/dev_BB': {
+        'org.bluez.Device1': { 'Address': <'BB'> }
+      }
+    })");
+    auto objects = parse_managed_objects(p.v);
+    ASSERT_EQ(objects.devices.size(), 2u);
+    for (const auto& device : objects.devices)
+        EXPECT_EQ(device.battery, device.address == "AA" ? 89 : -1);
+}
+
 TEST(BluetoothObjects, IgnoresUnexpectedPropertyTypes) {
     // A string where a boolean belongs must not throw or corrupt the record.
     Payload p(R"({

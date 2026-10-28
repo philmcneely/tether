@@ -146,6 +146,9 @@ namespace tether::tui {
                     if (airpods && bt_airpods_.value("address", "") == address) {
                         const std::string battery = ui::airpods_status_text(bt_airpods_);
                         subtitle += "\n  " + (battery.empty() ? std::string(_("Reading battery…")) : battery);
+                    } else if (!airpods && is_supervised(address)) {
+                        if (const std::string status = ui::phone_status_text(bt_connection_); !status.empty())
+                            subtitle += "\n  " + status;
                     }
                     Row row = device_row(name, subtitle, BT_PREFIX + address);
                     row.tone = route_ready || (airpods && is_connected) ? Tone::Good : Tone::Normal;
@@ -390,6 +393,15 @@ namespace tether::tui {
                     if (detail.empty() && route_up)
                         detail = _("Messages and notifications are connected.");
                     app::set_route(app::Route::Bluetooth, route_up, detail);
+                    std::string phone_name = "iPhone";
+                    for (const auto& device : bt_devices_)
+                        if (is_supervised(device.value("address", "")) && !device.value("name", "").empty())
+                            phone_name = device.value("name", "");
+                    const auto battery = event.find("battery");
+                    app::set_phone(phone_name,
+                                   battery != event.end() && battery->is_number_integer()
+                                       ? std::to_string(battery->get<int>()) + "%"
+                                       : "");
                     // A broadcast the Messages and Notifications pages need too.
                     return false;
                 }

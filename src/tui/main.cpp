@@ -128,6 +128,8 @@ namespace tether::tui {
             int unread = 0;
             std::string airpods_name;
             std::string airpods_battery;
+            std::string phone_name;
+            std::string phone_battery;
 
             // Rows from the last frame, so keys act on what is on screen.
             std::vector<Row> list_rows;
@@ -504,6 +506,8 @@ namespace tether::tui {
         void draw_status_line(int y, int width) {
             fill(y, 0, width, COLOR_PAIR(P_BAR));
             std::vector<std::string> parts = {route_text(app::Route::WiFi), route_text(app::Route::Bluetooth)};
+            if (!g.phone_battery.empty())
+                parts.push_back(tr_format(_("{}: {}"), g.phone_name, g.phone_battery));
             if (!g.airpods_battery.empty())
                 parts.push_back(tr_format(_("{}: {}"), g.airpods_name, g.airpods_battery));
             if (g.daemon_fd < 0)
@@ -1358,6 +1362,11 @@ namespace tether::tui {
         void set_airpods(const std::string& name, const std::string& battery) {
             g.airpods_name = name;
             g.airpods_battery = battery;
+        }
+
+        void set_phone(const std::string& name, const std::string& battery) {
+            g.phone_name = name;
+            g.phone_battery = battery;
         }
 
     } // namespace app
