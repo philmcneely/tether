@@ -94,7 +94,10 @@ final class TetherViewModel {
     }
 
     // Overall connection state.
-    private(set) var appState: AppConnectionState = .disconnected
+    private(set) var appState: AppConnectionState = .disconnected {
+        // The Camera tab only offers Stop while connected.
+        didSet { if appState != .connected { camera.stop() } }
+    }
 
     // Name of the connected device, if any.
     private(set) var connectedDeviceName: String?
@@ -863,8 +866,16 @@ final class TetherViewModel {
             errorMessage = identityErrorMessage
             return
         }
-        camera.start(host: host, port: port, pinnedFingerprint: connection.serverFingerprint,
-                     identity: identity, position: position)
+        let fingerprint = connection.serverFingerprint
+        Task {
+            // Without this, a denied permission surfaces as "Camera unavailable".
+            guard await AVCaptureDevice.requestAccess(for: .video) else {
+                errorMessage = "Allow camera access for Tether in Settings to stream."
+                return
+            }
+            camera.start(host: host, port: port, pinnedFingerprint: fingerprint,
+                         identity: identity, position: position)
+        }
     }
 
     private func finalizeIncomingTransfer(transferId: String) {

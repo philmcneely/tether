@@ -2533,6 +2533,13 @@ namespace tether {
         remote_it->second.paired = true;
         remote_it->second.device_name = device_name;
         remote_it->second.fingerprint = fingerprint;
+        // A second connection (the camera stream) sends no hello; keep the kind its device announced.
+        for (const auto& [fd, other] : connected_remote_clients) {
+            if (fd != client_fd && other.fingerprint == fingerprint) {
+                remote_it->second.device = other.device;
+                break;
+            }
+        }
 
         // Only a trusted session joins the broadcast registry.
         register_client_ssl(client_fd, ssl_it->second, fingerprint);

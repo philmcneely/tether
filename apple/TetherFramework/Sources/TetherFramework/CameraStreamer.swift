@@ -112,7 +112,6 @@ public final class CameraStreamer: NSObject {
         session.beginConfiguration()
         session.inputs.forEach { session.removeInput($0) }
         session.outputs.forEach { session.removeOutput($0) }
-        session.sessionPreset = .hd1920x1080
 
         guard let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: position),
               let input = try? AVCaptureDeviceInput(device: device),
@@ -123,6 +122,8 @@ public final class CameraStreamer: NSObject {
             return
         }
         session.addInput(input)
+        // Older front cameras top out below 1080p.
+        session.sessionPreset = session.canSetSessionPreset(.hd1920x1080) ? .hd1920x1080 : .high
 
         let output = AVCaptureVideoDataOutput()
         output.videoSettings = [
@@ -169,9 +170,11 @@ public final class CameraStreamer: NSObject {
         return session
     }
 
-    private func encoded(_ status: OSStatus, _ sample: CMSampleBuffer?) {
+    // `conn` is the connection the frame was encoded for; frames finishing after
+    // it was torn down are dropped.
+    private func encoded(_ status: OSStatus, _ sample: CMSampleBuffer?, for conn: NWConnection) {
         guard status == noErr, let sample, let payload = Self.annexB(sample) else {
-            queue.async { self.pending -= 1 }
+            queue.async { if self.connection === conn { self.pending -= 1 } }
             return
         }
         let keyframe = Self.isKeyframe(sample)
@@ -185,9 +188,10 @@ public final class CameraStreamer: NSObject {
         frame.append(payload)
 
         queue.async {
-            guard let conn = self.connection else { return }
+            guard self.connection === conn else { return }
             conn.send(content: frame, completion: .contentProcessed { [weak self] error in
-                guard let self else { return }
+                // Cancelling a connection fails its queued sends; that is not an error.
+                guard let self, self.connection === conn else { return }
                 self.pending -= 1
                 if let error { self.fail(error.localizedDescription) }
             })
@@ -253,7 +257,7 @@ extension CameraStreamer: AVCaptureVideoDataOutputSampleBufferDelegate {
         didOutput sampleBuffer: CMSampleBuffer,
         from connection: AVCaptureConnection
     ) {
-        guard self.connection != nil, let image = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
+        guard let conn = self.connection, let image = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
         // Skip frames before encoding while the network is behind, so no
         // encoded frame is ever lost and the decoder never needs a fresh keyframe.
         guard pending < Self.maxPending else { return }
@@ -276,7 +280,7 @@ extension CameraStreamer: AVCaptureVideoDataOutputSampleBufferDelegate {
             frameProperties: nil,
             infoFlagsOut: nil
         ) { [weak self] status, _, sample in
-            self?.encoded(status, sample)
+            self?.encoded(status, sample, for: conn)
         }
         if status != noErr { pending -= 1 }
     }
