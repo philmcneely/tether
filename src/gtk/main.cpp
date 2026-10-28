@@ -19,6 +19,7 @@
 #include <string>
 #include <tether/crypto.hpp>
 #include <tether/i18n.hpp>
+#include <utility>
 #include <vector>
 
 namespace {
@@ -30,6 +31,8 @@ namespace {
     GtkWidget* g_calls_page = nullptr;
     GtkWidget* g_calls_nav = nullptr;
     gboolean g_start_hidden = FALSE;
+
+    constexpr const char* kViews[] = {"devices", "messages", "notifications", "calls", "contacts"};
 
     GtkWidget* g_sidebar = nullptr;
     GtkWidget* g_sidebar_toggle = nullptr;
@@ -70,6 +73,8 @@ namespace {
     // what the current invocation asked to see
     std::string g_requested_view;
     std::string g_requested_thread;
+    // calls are hidden until the first bt_status
+    bool g_calls_requested = false;
 
     // Call control is off by default and enabled out of band, so the tab only
     // exists once the daemon reports it on.
@@ -79,11 +84,24 @@ namespace {
         gtk_widget_set_visible(g_calls_page, enabled);
         if (g_calls_nav)
             gtk_widget_set_visible(g_calls_nav, enabled);
+        if (std::exchange(g_calls_requested, false) && enabled && g_stack)
+            gtk_stack_set_visible_child_name(GTK_STACK(g_stack), "calls");
         if (enabled || !g_stack)
             return;
         const gchar* name = gtk_stack_get_visible_child_name(GTK_STACK(g_stack));
         if (name && std::string(name) == "calls")
             gtk_stack_set_visible_child_name(GTK_STACK(g_stack), "devices");
+    }
+
+    void select_view(const std::string& view) {
+        if (!g_stack)
+            return;
+        if (view == "calls" && g_calls_page && !gtk_widget_get_visible(g_calls_page)) {
+            g_calls_requested = true;
+            return;
+        }
+        g_calls_requested = false;
+        gtk_stack_set_visible_child_name(GTK_STACK(g_stack), view.c_str());
     }
 
     void apply_requested_view() {
@@ -92,7 +110,7 @@ namespace {
         if (!g_requested_thread.empty())
             g_requested_view = "messages";
         if (!g_requested_view.empty())
-            gtk_stack_set_visible_child_name(GTK_STACK(g_stack), g_requested_view.c_str());
+            select_view(g_requested_view);
         if (!g_requested_thread.empty())
             messages_view_open_thread(g_requested_thread);
         g_requested_view.clear();
@@ -145,6 +163,10 @@ namespace {
                 prefs()["window_width"] = width;
                 prefs()["window_height"] = height;
             }
+        }
+        if (g_stack) {
+            if (const gchar* view = gtk_stack_get_visible_child_name(GTK_STACK(g_stack)))
+                prefs()["last_view"] = std::string(view);
         }
         messages_view_store_prefs();
     }
@@ -444,6 +466,7 @@ namespace {
         if (!g_start_hidden)
             gtk_widget_show(window);
         gtk_stack_set_visible_child_name(GTK_STACK(stack), "devices");
+        select_view(prefs().value("last_view", std::string("devices")));
     }
 
 } // namespace
@@ -459,7 +482,7 @@ int main(int argc, char** argv) {
                                   G_OPTION_ARG_NONE,
                                   _("Start hidden in the system tray"),
                                   nullptr);
-    for (const char* view : {"devices", "messages", "notifications", "calls", "contacts"}) {
+    for (const char* view : kViews) {
         g_application_add_main_option(
             G_APPLICATION(app), view, 0, G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE, _("Open on this tab"), nullptr);
     }
@@ -512,7 +535,7 @@ int main(int argc, char** argv) {
                          }
                          if (g_variant_dict_contains(options, "tray"))
                              g_start_hidden = TRUE;
-                         for (const char* view : {"devices", "messages", "notifications", "contacts"}) {
+                         for (const char* view : kViews) {
                              if (g_variant_dict_contains(options, view))
                                  g_requested_view = view;
                          }
