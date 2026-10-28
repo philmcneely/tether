@@ -40,6 +40,7 @@ ignore this message.
 | Feature | Meaning |
 |---|---|
 | `clipboard_image` | [Clipboard images](#clipboard-images-both-directions) |
+| `camera` | [Camera](#7-camera-iphone-as-a-webcam). Daemon only; its `hello` also carries `"port"`, the TCP port to dial for the stream. |
 
 ---
 
@@ -650,3 +651,37 @@ one device, so a reader can still follow which device a line refers to without l
 which device it is. Message bodies, contact names, and notification content are dropped
 outright rather than redacted, and message and notification events never enter the timeline
 in the first place.
+
+---
+
+## 7. Camera (iPhone as a webcam)
+
+The phone streams its camera to the daemon, which publishes it as a PipeWire
+`Video/Source` node (`media.role` `Camera`) named after the phone. The stream uses its
+own TLS connection, not the main session, so video never delays other messages.
+
+1. The phone opens a new connection to the daemon's address and the `port` from its
+   `hello`, with the same client certificate. The phone must only accept the daemon's pinned
+   fingerprint here.
+2. Its first line is `camera_start`. The daemon answers nothing; an unpaired session gets
+   the usual `unauthorized` error, and a daemon without camera support closes the connection.
+3. Everything after that line is binary frames until the connection closes. The node then
+   stays and shows black, so apps keep it selected for the next stream. A new `camera_start`
+   replaces any stream already running. The daemon sends nothing on success, so any line it
+   sends on this connection is an `error`.
+
+```json
+{"command": "camera_start", "codec": "h264", "width": 1920, "height": 1080, "fps": 30}
+```
+
+Each frame, big-endian:
+
+| Bytes | Field |
+|---|---|
+| 4 | length of everything after this field (at most 4 MiB) |
+| 1 | flags; bit 0 set on keyframes |
+| 8 | presentation time, microseconds |
+| rest | one H.264 access unit, Annex B (start codes); keyframes carry SPS and PPS |
+
+The sender sends a keyframe at least every 2 seconds, so a viewer that joins mid-stream
+shows video within that time. The daemon reads the frame size from the stream.

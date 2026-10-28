@@ -22,6 +22,8 @@ BuildRequires:  gtk3-devel
 BuildRequires:  gtk-layer-shell-devel
 BuildRequires:  libnotify-devel
 BuildRequires:  ncurses-devel
+BuildRequires:  libavcodec-free-devel
+BuildRequires:  pipewire-devel
 BuildRequires:  gettext
 BuildRequires:  npm
 BuildRequires:  zip

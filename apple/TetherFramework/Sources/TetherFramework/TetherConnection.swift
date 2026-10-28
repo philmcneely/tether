@@ -62,26 +62,12 @@ public final class TetherConnection {
     public func connect(to endpoint: NWEndpoint, identity: SecIdentity) {
         teardown()
 
-        let tlsOptions = NWProtocolTLS.Options()
-        let secOptions = tlsOptions.securityProtocolOptions
-
-        // Present our client certificate for mTLS
-        let secIdentity = sec_identity_create(identity)!
-        sec_protocol_options_set_local_identity(secOptions, secIdentity)
-
-        // TLS 1.2 only to ensure stability with the daemon's OpenSSL configuration
-        sec_protocol_options_set_min_tls_protocol_version(secOptions, .TLSv12)
-        sec_protocol_options_set_max_tls_protocol_version(secOptions, .TLSv12)
-
         // Accept any server certificate (daemon uses self-signed)
         // and capture the server's fingerprint.
-        sec_protocol_options_set_verify_block(secOptions, { [weak self] metadata, trust, completion in
-            self?.captureServerFingerprint(trust: trust)
-            completion(true)
-        }, .main)
-
-        let params = NWParameters(tls: tlsOptions, tcp: .init())
-        params.includePeerToPeer = true
+        let params = Self.tlsParameters(identity: identity) { [weak self] fingerprint in
+            self?.serverFingerprint = fingerprint
+            return true
+        }
 
         let conn = NWConnection(to: endpoint, using: params)
 
@@ -218,16 +204,34 @@ public final class TetherConnection {
         }
     }
 
-    // MARK: - Private — TLS Fingerprint
+    // MARK: - TLS
 
-    // Extract the server's certificate and compute its SHA-256 fingerprint.
-    private func captureServerFingerprint(trust: sec_trust_t) {
-        let secTrust = sec_trust_copy_ref(trust).takeRetainedValue()
+    // TLS parameters presenting our client certificate for mTLS. `verify` gets the
+    // server's SHA-256 fingerprint ("" if it has none) on the main queue and decides
+    // whether to trust it.
+    static func tlsParameters(identity: SecIdentity, verify: @escaping (String) -> Bool) -> NWParameters {
+        let tlsOptions = NWProtocolTLS.Options()
+        let secOptions = tlsOptions.securityProtocolOptions
 
-        if let certChain = SecTrustCopyCertificateChain(secTrust) as? [SecCertificate],
-           let serverCert = certChain.first
-        {
-            serverFingerprint = CertificateManager.fingerprint(ofCertificate: serverCert)
-        }
+        sec_protocol_options_set_local_identity(secOptions, sec_identity_create(identity)!)
+
+        // TLS 1.2 only to ensure stability with the daemon's OpenSSL configuration
+        sec_protocol_options_set_min_tls_protocol_version(secOptions, .TLSv12)
+        sec_protocol_options_set_max_tls_protocol_version(secOptions, .TLSv12)
+
+        sec_protocol_options_set_verify_block(secOptions, { _, trust, completion in
+            let secTrust = sec_trust_copy_ref(trust).takeRetainedValue()
+            var fingerprint = ""
+            if let certChain = SecTrustCopyCertificateChain(secTrust) as? [SecCertificate],
+               let serverCert = certChain.first
+            {
+                fingerprint = CertificateManager.fingerprint(ofCertificate: serverCert)
+            }
+            completion(verify(fingerprint))
+        }, .main)
+
+        let params = NWParameters(tls: tlsOptions, tcp: .init())
+        params.includePeerToPeer = true
+        return params
     }
 }

@@ -8,6 +8,8 @@
 	<array>
 		<string>_tether._tcp</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Used to stream the camera to your desktop as a webcam.</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Used to discover and connect to Tether services on your local network.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

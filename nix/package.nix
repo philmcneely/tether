@@ -21,6 +21,8 @@
   gtk-layer-shell,
   libnotify,
   ncurses,
+  ffmpeg,
+  pipewire,
   nlohmann_json,
   gtest,
   bluez,
@@ -97,6 +99,8 @@ stdenv.mkDerivation (finalAttrs: {
     gtk-layer-shell
     libnotify
     ncurses
+    ffmpeg
+    pipewire
   ];
 
   cmakeFlags = [

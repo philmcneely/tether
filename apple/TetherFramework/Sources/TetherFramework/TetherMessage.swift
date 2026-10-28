@@ -73,6 +73,8 @@ public struct TetherMessage: Codable, Sendable {
     public var features: [String]?
     // "phone", "tablet" or "computer", so the desktop can show the right icon.
     public var device: String?
+    // The daemon's TCP port, sent with the camera feature.
+    public var port: UInt16?
 
     // Pairing
     public var deviceName: String?
@@ -89,7 +91,7 @@ public struct TetherMessage: Codable, Sendable {
         case command, content, filename, size
         case transferId = "transfer_id"
         case chunkIndex = "chunk_index"
-        case data, clipboard, features, device
+        case data, clipboard, features, device, port
         case deviceName = "device_name"
         case otp, source
         case status, message
@@ -110,7 +112,8 @@ public struct TetherMessage: Codable, Sendable {
         message: String? = nil,
         clipboard: String? = nil,
         features: [String]? = nil,
-        device: String? = nil
+        device: String? = nil,
+        port: UInt16? = nil
     ) {
         self.command = command
         self.content = content
@@ -127,6 +130,7 @@ public struct TetherMessage: Codable, Sendable {
         self.clipboard = clipboard
         self.features = features
         self.device = device
+        self.port = port
     }
 }
 

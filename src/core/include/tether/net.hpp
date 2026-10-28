@@ -164,6 +164,16 @@ namespace tether {
         // Invoked when the set of trusted peers gains a member with no live session.
         void set_peers_changed_callback(std::function<void()> callback);
 
+        // Receives a paired session that sent camera_start. The handler owns fd and ssl;
+        // leftover holds bytes already read past the start line.
+        using CameraHandler = std::function<void(int fd,
+                                                 SSL* ssl,
+                                                 const nlohmann::json& start,
+                                                 std::string leftover,
+                                                 const std::string& device_name)>;
+        // Also advertises the camera feature in hello.
+        void set_camera_handler(CameraHandler handler);
+
     private:
         struct ConnectedClientInfo {
             std::string address;
@@ -183,6 +193,8 @@ namespace tether {
         void promote_session(int client_fd, const std::string& fingerprint, const std::string& device_name);
         // Frees the SSL session, forgets every per-client table, and closes the fd.
         void drop_client(int fd);
+        // Forgets every per-client table and stops polling fd, leaving fd and SSL open.
+        void detach_client(int fd);
 
         EpollEventLoop& loop_;
         int server_fd_ = -1;
@@ -199,6 +211,7 @@ namespace tether {
         std::set<std::string> dialing_;
 
         std::function<void()> peers_changed_;
+        CameraHandler camera_handler_;
 
         // Track spawned dialog child processes
         struct PendingPairDialog {

@@ -19,7 +19,8 @@ export APPIMAGE_EXTRACT_AND_RUN=1
 
 cmake -B "$BUILD_DIR" -S "$ROOT" -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_INSTALL_PREFIX=/usr
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DTETHER_CAMERA=OFF
 cmake --build "$BUILD_DIR"
 
 rm -rf "$APPDIR"

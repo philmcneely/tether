@@ -9,6 +9,7 @@
 import Foundation
 import SwiftUI
 import UniformTypeIdentifiers
+import AVFoundation
 import UIKit
 import TetherFramework
 internal import Network
@@ -27,6 +28,7 @@ enum AppTab: Hashable {
     case dashboard
     case clipboard
     case files
+    case camera
     case settings
 }
 
@@ -92,7 +94,10 @@ final class TetherViewModel {
     }
 
     // Overall connection state.
-    private(set) var appState: AppConnectionState = .disconnected
+    private(set) var appState: AppConnectionState = .disconnected {
+        // The Camera tab only offers Stop while connected.
+        didSet { if appState != .connected { camera.stop() } }
+    }
 
     // Name of the connected device, if any.
     private(set) var connectedDeviceName: String?
@@ -100,6 +105,9 @@ final class TetherViewModel {
     // Whether the daemon answered hello with clipboard_image. Older daemons
     // would save a sent image to Downloads instead of the clipboard.
     private(set) var daemonSupportsClipboardImages = false
+
+    // The port to dial for a camera stream, when the daemon announced camera support.
+    private(set) var daemonCameraPort: UInt16?
 
     // Clipboard history (most recent first).
     private(set) var clipboardHistory: [ClipboardEntry] = []
@@ -132,6 +140,7 @@ final class TetherViewModel {
     let discovery = BonjourDiscovery()
     let connection = TetherConnection()
     let server = TetherServer()
+    let camera = CameraStreamer()
 
     // The chunk size for file transfers (48KB raw → 64KB base64).
     private let fileChunkSize = 48 * 1024
@@ -221,6 +230,8 @@ final class TetherViewModel {
             pendingReconnectTask = nil
             connectTimeoutTask?.cancel()
             connectTimeoutTask = nil
+            // iOS takes the camera from background apps
+            camera.stop()
             suspendForBackground()
         default:
             break
@@ -736,6 +747,7 @@ final class TetherViewModel {
 
         case .hello:
             daemonSupportsClipboardImages = message.features?.contains("clipboard_image") ?? false
+            daemonCameraPort = message.features?.contains("camera") == true ? message.port : nil
 
         case .fileStatus:
             if let transferId = message.transferId, message.status == "success" {
@@ -840,7 +852,33 @@ final class TetherViewModel {
     // unpinned daemon answers anything else with "unauthorized".
     private func sendHello() {
         daemonSupportsClipboardImages = false
+        daemonCameraPort = nil
         connection.send(.hello(features: ["clipboard_image"]))
+    }
+
+    // MARK: - Camera
+
+    // Streams the camera to the connected daemon, which shows it as a webcam.
+    func startCamera(position: AVCaptureDevice.Position) {
+        guard appState == .connected, let port = daemonCameraPort,
+              let host = connection.resolvedEndpoint?.host else { return }
+        guard let identity = certificateManager.getIdentity() else {
+            errorMessage = identityErrorMessage
+            return
+        }
+        let fingerprint = connection.serverFingerprint
+        Task {
+            // Without this, a denied permission surfaces as "Camera unavailable".
+            guard await AVCaptureDevice.requestAccess(for: .video) else {
+                errorMessage = "Allow camera access for Tether in Settings to stream."
+                return
+            }
+            // The session may have dropped while the permission prompt was up.
+            guard appState == .connected, daemonCameraPort == port,
+                  connection.serverFingerprint == fingerprint else { return }
+            camera.start(host: host, port: port, pinnedFingerprint: fingerprint,
+                         identity: identity, position: position)
+        }
     }
 
     private func finalizeIncomingTransfer(transferId: String) {
