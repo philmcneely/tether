@@ -61,6 +61,7 @@ set(CMAKE_WARN_DEPRECATED ON CACHE BOOL "" FORCE)
 enable_testing()
 
 option(TETHER_BUILD_TUI "Build the tether-tui terminal front end (needs ncursesw)" ON)
+option(TETHER_CAMERA "Publish the iPhone camera as a PipeWire video source (needs libavcodec, libpipewire)" ON)
 
 # subdirectories for the targets
 add_subdirectory(src)

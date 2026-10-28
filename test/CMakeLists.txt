@@ -1,5 +1,6 @@
 add_executable(tether_test
     test_base64.cpp
+    test_camera_frame.cpp
     test_clipboard.cpp
     test_airpods.cpp
     test_audio.cpp

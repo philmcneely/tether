@@ -1936,12 +1936,14 @@ namespace tether {
 
     void TcpServer::drop_client(int fd) {
         auto ssl_it = active_ssl_.find(fd);
-        if (ssl_it != active_ssl_.end()) {
-            if (ssl_it->second)
-                SSL_free(ssl_it->second);
-            active_ssl_.erase(ssl_it);
-        }
+        if (ssl_it != active_ssl_.end() && ssl_it->second)
+            SSL_free(ssl_it->second);
+        detach_client(fd);
+        close(fd);
+    }
 
+    void TcpServer::detach_client(int fd) {
+        active_ssl_.erase(fd);
         client_buffers_.erase(fd);
         clipboard_images_.erase(fd);
         ssl_handshake_complete_.erase(fd);
@@ -1952,7 +1954,6 @@ namespace tether {
 
         unregister_client_fd(fd);
         loop_.removeFd(fd);
-        close(fd);
     }
 
     // Drops peers that vanish without FIN/RST: keepalive covers idle sessions (~90 s),
@@ -2401,9 +2402,27 @@ namespace tether {
                         }
                         nlohmann::json resp{{"command", "hello"}};
                         resp["features"] = nlohmann::json::array({"clipboard_image"});
+                        if (camera_handler_) {
+                            resp["features"].push_back("camera");
+                            // the phone dials this for the camera stream
+                            resp["port"] = bind_port_;
+                        }
                         std::string payload = resp.dump() + "\n";
                         robust_ssl_write(ssl, payload.c_str(), payload.size());
                         continue;
+                    } else if (j.contains("command") && j["command"] == "camera_start") {
+                        if (!camera_handler_) {
+                            std::string rej = "{\"command\":\"error\",\"message\":\"camera unsupported\"}\n";
+                            robust_ssl_write(ssl, rej.c_str(), rej.size());
+                            drop_client(client_fd);
+                            return;
+                        }
+                        // This connection now carries only binary video frames.
+                        std::string leftover = buffer.substr(start);
+                        const std::string device_name = client_info_[client_fd].device_name;
+                        detach_client(client_fd);
+                        camera_handler_(client_fd, ssl, j, std::move(leftover), device_name);
+                        return;
                     } else if (j.contains("command") && j["command"] == "open_url" && j.contains("content") &&
                                j["content"].is_string()) {
                         open_web_url(j["content"].get<std::string>());
@@ -2528,6 +2547,8 @@ namespace tether {
     }
 
     void TcpServer::set_peers_changed_callback(std::function<void()> callback) { peers_changed_ = std::move(callback); }
+
+    void TcpServer::set_camera_handler(CameraHandler handler) { camera_handler_ = std::move(handler); }
 
     bool TcpServer::forget_device(const std::string& fingerprint) {
         if (fingerprint.empty())

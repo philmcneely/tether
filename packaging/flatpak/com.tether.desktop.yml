@@ -69,6 +69,7 @@ modules:
       - -DCMAKE_BUILD_TYPE=Release
       - -DTETHER_BUILD_EXTENSIONS=OFF
       - -DTETHER_BUILD_TUI=OFF
+      - -DTETHER_CAMERA=OFF
     build-options:
       build-args:
         - --share=network

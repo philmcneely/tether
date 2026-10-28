@@ -27,6 +27,10 @@ struct ContentView: View {
                 FilesView()
             }
 
+            Tab("Camera", systemImage: "web.camera", value: AppTab.camera) {
+                CameraView()
+            }
+
             Tab("Settings", systemImage: "gearshape", value: AppTab.settings) {
                 SettingsView()
             }

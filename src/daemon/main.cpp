@@ -1,4 +1,7 @@
 #include "notification.hpp"
+#ifdef TETHER_CAMERA
+#include "camera.hpp"
+#endif
 #include <algorithm>
 #include <charconv>
 #include <csignal>
@@ -112,6 +115,9 @@ int main(int argc, char** argv) {
     }
 
     tether::TcpServer tcp_srv(loop, port);
+#ifdef TETHER_CAMERA
+    tcp_srv.set_camera_handler(tether::start_camera_stream);
+#endif
     tether::UnixServer unix_srv(loop, tcp_srv);
     if (!unix_srv.start()) {
         debug::log(ERR, "Failed to start Unix server");
