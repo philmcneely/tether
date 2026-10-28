@@ -33,9 +33,10 @@
 | **Browser Extension** | ✅ Stable |
 | **Mail Extension** | ✅ Stable |
 | **Messages (SMS/iMessage)** | ✅ Stable |
-| **Notification Mirroring** | 🧪 Beta |
-| **Phone Calls** (PipeWire only) | 🧪 Alpha |
-| **AirPods** (opt-in) | 🧪 Alpha |
+| **Notification Mirroring** | ✅ Stable |
+| **Phone Calls** (PipeWire only) | 🧪 Beta |
+| **AirPods** (opt-in) | 🧪 Beta |
+| **Continuity Camera** (PipeWire only) | 🧪 Alpha |
 
 ### Clipboard Sync
 Text copied on your Linux desktop appears instantly on your iPhone, and vice versa.
@@ -58,12 +59,19 @@ Connections run over TLS 1.2 and both sides present a self-signed X.509 certific
 ### Phone Calls
 Place, answer and end calls on the iPhone from the desktop, complete with caller ID and the phone's carrier and signal. 
 Recent calls from the iPhone are listed with a button to call back, and the iPhone's favorites are starred at the top of Contacts. These need **Phone Recents** and **Phone Favorites** turned on under the iPhone's Bluetooth settings for this computer.
-The call audio stays on the iPhone. If you've used Linux long enough you know why (it sounds like "FalsePotty-o"). PulsAlsaWire is too hard to support across all deployment targets.
 
 Out of the box, Linux offers itself to the iPhone as a Bluetooth speaker. The iPhone's music and sounds then play on the computer, and call control stops working. One small audio setting fixes it, and you pick which way:
 
 - **Keep the iPhone's sound on the iPhone, always.** See [Keeping the phone's audio on the phone](docs/BLUETOOTH.md#keeping-the-phones-audio-on-the-phone).
 - **Switch whenever you like.** Settings > Experimental > *Play the iPhone's audio on this computer*, or `tether --bt-phone-audio here` and `tether --bt-phone-audio phone`. See [Switching it instead](docs/BLUETOOTH.md#switching-it-instead).
+
+### Continuity Camera
+Use the iPhone as a webcam. Open the Camera tab in the iOS app and tap **Start Streaming**. The desktop gets a PipeWire camera named after the phone. Keep the app open while streaming, because iOS turns the camera off for apps in the background.
+
+- **Chromium/Chrome:** enable `chrome://flags/#enable-webrtc-pipewire-camera`.
+- **Firefox:** set `media.webrtc.camera.allow-pipewire` to `true` in `about:config`.
+- **OBS:** add a *Video Capture Device (PipeWire)* source.
+- **Apps that only use V4L2** (such as native Zoom and Discord): try `pw-v4l2 <app>`.
 
 ### OTP Handling
 Streamline two-factor authentication across your devices:
@@ -410,6 +418,7 @@ flowchart LR
 - `glib2`
 - `avahi`
 - `bluez`, `bluez-utils`, and `bluez-obex` (for messages and notifications)
+- `ffmpeg` (libavcodec) and `pipewire` (for Continuity Camera; turn off with `-DTETHER_CAMERA=OFF`)
 
 #### Bluetooth (for Messages and Notifications)
 - BlueZ 5.86+ must be running with experimental bearer API. `tether bt setup`
