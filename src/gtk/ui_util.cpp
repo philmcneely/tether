@@ -38,7 +38,7 @@ namespace tether::ui {
 .tether-nav-item { border: none; box-shadow: none; background: transparent; border-radius: 10px; padding: 12px; }
 .tether-nav-item:hover { background-color: alpha(@theme_fg_color, 0.07); }
 .tether-nav-item:checked { background-color: alpha(@theme_selected_bg_color, 0.20); color: @theme_fg_color; font-weight: bold; }
-.tether-app headerbar { min-height: 42px; box-shadow: none; border-bottom: 1px solid alpha(@theme_fg_color, 0.08); }
+.tether-app headerbar { min-height: 42px; box-shadow: none; border-bottom: 1px solid mix(@theme_bg_color, @theme_fg_color, 0.08); }
 .tether-page-header { padding: 22px 24px; border-bottom: 1px solid alpha(@theme_fg_color, 0.08); }
 .tether-page-title { font-size: 16.5pt; font-weight: bold; }
 .tether-hero-title { font-size: 17.25pt; font-weight: bold; }
