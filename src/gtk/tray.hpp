@@ -19,6 +19,9 @@ namespace tether::ui {
     // nothing connected, or the channel has reported nothing yet.
     void tray_set_airpods(const std::string& name, const std::string& battery);
 
+    // The supervised iPhone's battery for the tooltip; empty hides the line.
+    void tray_set_phone(const std::string& name, const std::string& battery);
+
     // Repaints from cached state, for when the daemon returns before any route event.
     void tray_refresh();
 

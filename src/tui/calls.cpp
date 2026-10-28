@@ -166,7 +166,7 @@ namespace tether::tui {
                 if (command == "bt_connection_changed") {
                     const json calls = event.contains("calls") ? event["calls"] : json();
                     available_ = calls.is_object() && calls.value("available", false);
-                    network_ = available_ ? ui::network_text(calls) : "";
+                    network_ = available_ ? ui::phone_status_text(event) : "";
                     const std::string reason = calls.is_object() ? calls.value("reason", "") : "";
                     const std::string audio = calls.is_object() ? calls.value("audio", "") : "";
                     audio_routable_ = !audio.empty() && audio != "active";

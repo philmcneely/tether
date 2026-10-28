@@ -30,8 +30,11 @@ namespace tether::ui {
     const char* call_state_text(const std::string& state);
 
     // What HFP reports about the phone's cellular link. "spoken" replaces the
-    // bar glyphs and bare percentage with words for screen readers.
+    // bar glyphs with words for screen readers.
     std::string network_text(const nlohmann::json& calls, bool spoken = false);
+
+    // The phone's battery then its cellular link, from a bt_connection payload.
+    std::string phone_status_text(const nlohmann::json& connection, bool spoken = false);
 
     // Time of day for today's calls, the date as well for older ones.
     std::string format_call_time(int64_t epoch);

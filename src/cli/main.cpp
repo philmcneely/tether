@@ -855,12 +855,15 @@ static int print_bt_connection(tether::Client& client) {
         // Carrier and signal come from the phone over HFP.
         const std::string carrier = calls.value("operator", "");
         call_state += "  [" + (carrier.empty() ? std::string(_("no carrier")) : carrier) +
-                      tether::tr_format(_(" signal {0}/5 battery {1}/5"),
-                                        std::to_string(calls.value("signal", 0)),
-                                        std::to_string(calls.value("battery", 0))) +
+                      tether::tr_format(_(" signal {}/5"), std::to_string(calls.value("signal", 0))) +
                       (calls.value("roaming", false) ? std::string(" ") + _("roaming") : std::string{}) + "]";
     }
     fields.emplace_back(_("Calls (HFP)"), call_state);
+    const auto battery = resp.find("battery");
+    fields.emplace_back(_("Battery"),
+                        battery != resp.end() && battery->is_number_integer()
+                            ? std::to_string(battery->get<int>()) + "%"
+                            : _("unknown"));
     print_fields(fields);
 
     const std::string link = resp.value("link_reason", "");

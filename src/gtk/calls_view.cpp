@@ -273,8 +273,8 @@ namespace tether::ui {
 
             gtk_widget_set_sensitive(g_calls.entry, g_calls.available);
             gtk_widget_set_sensitive(g_calls.dial_button, g_calls.available);
-            set_text(g_calls.network_label, g_calls.available ? network_text(calls) : "");
-            set_accessible_name(g_calls.network_label, g_calls.available ? network_text(calls, true) : "");
+            set_text(g_calls.network_label, g_calls.available ? phone_status_text(event) : "");
+            set_accessible_name(g_calls.network_label, g_calls.available ? phone_status_text(event, true) : "");
 
             const std::string reason = calls.is_object() ? calls.value("reason", "") : "";
             const std::string audio = calls.is_object() ? calls.value("audio", "") : "";

@@ -119,6 +119,7 @@ namespace tether::tui {
         void set_route(Route route, bool ok, const std::string& detail);
         void set_unread(int unread);
         void set_airpods(const std::string& name, const std::string& battery);
+        void set_phone(const std::string& name, const std::string& battery);
 
     } // namespace app
 

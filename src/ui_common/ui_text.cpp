@@ -126,10 +126,23 @@ namespace tether::ui {
         }
         if (calls.value("roaming", false))
             out += gap + _("roaming");
-        if (const int battery = calls.value("battery", 0); battery > 0) {
-            const std::string level = std::to_string(battery * 20) + "%";
+        return out;
+    }
+
+    std::string phone_status_text(const nlohmann::json& connection, bool spoken) {
+        if (!connection.is_object())
+            return {};
+        std::string out;
+        if (const auto it = connection.find("battery"); it != connection.end() && it->is_number_integer()) {
+            const std::string level = std::to_string(it->get<int>()) + "%";
             // TRANSLATORS: The iPhone's battery level read aloud, {} is like "80%".
-            out += gap + (spoken ? tether::tr_format(_("battery {}"), level) : level);
+            out = spoken ? tether::tr_format(_("battery {}"), level) : level;
+        }
+        const auto calls = connection.find("calls");
+        if (calls != connection.end() && calls->is_object() && calls->value("available", false)) {
+            const std::string network = network_text(*calls, spoken);
+            if (!network.empty())
+                out += (out.empty() ? "" : (spoken ? ", " : "  ")) + network;
         }
         return out;
     }

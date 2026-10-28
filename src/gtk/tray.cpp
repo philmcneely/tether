@@ -72,6 +72,8 @@ namespace tether::ui {
         std::string g_tooltip;
         std::string g_airpods_name;
         std::string g_airpods_battery;
+        std::string g_phone_name;
+        std::string g_phone_battery;
         bool g_close_to_tray = false;
         std::string g_icon_style = "symbolic";
         std::string g_icon_suffix;
@@ -249,6 +251,8 @@ namespace tether::ui {
             // TRANSLATORS: {} is a transport name, "Wi-Fi" or "Bluetooth", or a device name.
             tooltip += tether::tr_format(_("{}: {}"), route_name(route), status) + "\n";
         }
+        if (!g_phone_battery.empty())
+            tooltip += tether::tr_format(_("{}: {}"), g_phone_name, g_phone_battery) + "\n";
         if (!g_airpods_battery.empty())
             tooltip += tether::tr_format(_("{}: {}"), g_airpods_name, g_airpods_battery) + "\n";
         if (!daemon_connected())
@@ -277,6 +281,14 @@ namespace tether::ui {
             return;
         g_airpods_name = name;
         g_airpods_battery = battery;
+        tray_refresh();
+    }
+
+    void tray_set_phone(const std::string& name, const std::string& battery) {
+        if (name == g_phone_name && battery == g_phone_battery)
+            return;
+        g_phone_name = name;
+        g_phone_battery = battery;
         tray_refresh();
     }
 

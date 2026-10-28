@@ -335,6 +335,21 @@ namespace tether::bluetooth {
             return address;
         }
 
+        // Percent from the LE Battery Service, else HFP's 0-5 level, else null.
+        nlohmann::json
+            phone_battery(const BluezMonitor* monitor, const std::string& address, const nlohmann::json& calls) {
+            if (monitor) {
+                const std::string wanted = normalize_address(address);
+                for (const auto& device : monitor->snapshot().devices)
+                    if (device.battery >= 0 && normalize_address(device.address) == wanted)
+                        return device.battery;
+            }
+            if (calls.is_object() && calls.value("available", false) && calls.value("indicators", true) &&
+                calls.value("battery", 0) > 0)
+                return calls.value("battery", 0) * 20;
+            return nullptr;
+        }
+
         // Bearer operations backed by BlueZ on the system bus.
         class BluezBearerOps : public BearerOps {
         public:
@@ -817,6 +832,7 @@ namespace tether::bluetooth {
         nlohmann::json payload = to_json(bearers->status(), profiles->status());
         auto client = calls_client();
         payload["calls"] = client ? client->status() : nlohmann::json(nullptr);
+        payload["battery"] = phone_battery(monitor, address, payload["calls"]);
         std::lock_guard<std::mutex> lock(status_mutex);
         payload["ancs_ready"] = ancs_ready;
         payload["ancs_reason"] = ancs_reason;

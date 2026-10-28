@@ -81,6 +81,9 @@ namespace tether::bluetooth {
         // Device1.PreferredBearer: "le", "bredr" or "last-seen".
         std::string preferred_bearer;
 
+        // org.bluez.Battery1 Percentage, -1 when BlueZ exposes none.
+        int battery = -1;
+
         bool has_le_bearer = false;
         bool le_paired = false;
         bool le_bonded = false;

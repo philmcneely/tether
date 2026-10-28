@@ -23,6 +23,7 @@ namespace tether::bluetooth {
         constexpr const char* IFACE_BEARER_LE = "org.bluez.Bearer.LE1";
         constexpr const char* IFACE_BEARER_BREDR = "org.bluez.Bearer.BREDR1";
         constexpr const char* IFACE_CHARACTERISTIC = "org.bluez.GattCharacteristic1";
+        constexpr const char* IFACE_BATTERY = "org.bluez.Battery1";
         constexpr const char* UUID_ANCS_NOTIFICATION_SOURCE = "9fbf120d-6301-42d9-8c58-25e699a21dbd";
         constexpr const char* UUID_GAP_DEVICE_NAME = "00002a00-0000-1000-8000-00805f9b34fb";
 
@@ -296,6 +297,14 @@ namespace tether::bluetooth {
                 d.classic_paired = get_bool(br, "Paired");
                 d.classic_bonded = get_bool(br, "Bonded", d.classic_paired);
                 g_variant_unref(br);
+            }
+
+            if (GVariant* battery = g_variant_lookup_value(ifaces, IFACE_BATTERY, G_VARIANT_TYPE("a{sv}"))) {
+                if (GVariant* v = g_variant_lookup_value(battery, "Percentage", G_VARIANT_TYPE_BYTE)) {
+                    d.battery = g_variant_get_byte(v);
+                    g_variant_unref(v);
+                }
+                g_variant_unref(battery);
             }
 
             out.devices.push_back(std::move(d));

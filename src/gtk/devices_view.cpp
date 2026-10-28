@@ -162,6 +162,13 @@ namespace tether::ui {
             set_accessible_name(label, spoken.empty() ? text : spoken);
         }
 
+        void set_phone_label(GtkWidget* label) {
+            const std::string text = phone_status_text(g_devices.bt_connection);
+            set_text(label, text);
+            set_accessible_name(label, text.empty() ? "" : phone_status_text(g_devices.bt_connection, true));
+            gtk_widget_set_visible(label, !text.empty());
+        }
+
         // The daemon supervises one iPhone at a time, so the live profile status
         // describes whichever Bluetooth device is bonded, not the one merely
         // selected in the list.
@@ -1184,6 +1191,14 @@ namespace tether::ui {
                     set_battery_label(battery, g_devices.bt_airpods, airpods_row_text(g_devices.bt_airpods));
                 g_object_set_data(G_OBJECT(row), "bt_battery", battery);
                 gtk_box_pack_start(GTK_BOX(labels), battery, FALSE, FALSE, 0);
+            } else if (is_supervised_bt_device(address)) {
+                GtkWidget* status = gtk_label_new(nullptr);
+                gtk_label_set_xalign(GTK_LABEL(status), 0.0);
+                gtk_style_context_add_class(gtk_widget_get_style_context(status), "muted");
+                gtk_widget_set_no_show_all(status, TRUE);
+                set_phone_label(status);
+                g_object_set_data(G_OBJECT(row), "bt_phone_status", status);
+                gtk_box_pack_start(GTK_BOX(labels), status, FALSE, FALSE, 0);
             }
 
             gtk_box_pack_start(GTK_BOX(box), labels, TRUE, TRUE, 0);
@@ -1548,6 +1563,24 @@ namespace tether::ui {
             if (detail.empty() && connected)
                 detail = _("Messages and notifications are connected.");
             set_route_status(Route::Bluetooth, connected, detail);
+
+            std::string phone_name;
+            GList* rows = gtk_container_get_children(GTK_CONTAINER(g_devices.list_devices));
+            for (GList* item = rows; item; item = item->next) {
+                auto* status = GTK_WIDGET(g_object_get_data(G_OBJECT(item->data), "bt_phone_status"));
+                if (!status)
+                    continue;
+                set_phone_label(status);
+                if (const char* name = (const char*)g_object_get_data(G_OBJECT(item->data), "name"))
+                    phone_name = name;
+            }
+            g_list_free(rows);
+            const auto battery = event.find("battery");
+            tray_set_phone(phone_name.empty() ? "iPhone" : phone_name,
+                           battery != event.end() && battery->is_number_integer()
+                               ? std::to_string(battery->get<int>()) + "%"
+                               : "");
+
             update_right_pane();
             // A status broadcast, not a command this view owns: the Messages and
             // Notifications views need the same event.

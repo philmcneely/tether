@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tether\n"
 "Report-Msgid-Bugs-To: zack@bartel.com\n"
-"POT-Creation-Date: 2026-10-25 20:55-0700\n"
+"POT-Creation-Date: 2026-10-27 21:04-0700\n"
 "PO-Revision-Date: 2026-08-23\n"
 "Last-Translator: Tether project\n"
 "Language-Team: Italian\n"
@@ -716,8 +716,8 @@ msgstr "nessun operatore"
 
 #: src/cli/main.cpp
 #, c++-format
-msgid " signal {0}/5 battery {1}/5"
-msgstr " segnale {0}/5 batteria {1}/5"
+msgid " signal {}/5"
+msgstr " segnale {}/5"
 
 #: src/cli/main.cpp src/ui_common/ui_text.cpp
 msgid "roaming"
@@ -726,6 +726,10 @@ msgstr "roaming"
 #: src/cli/main.cpp
 msgid "Calls (HFP)"
 msgstr "Chiamate (HFP)"
+
+#: src/cli/main.cpp
+msgid "Battery"
+msgstr "Batteria"
 
 #: src/cli/main.cpp
 msgid "Could not read Bluetooth diagnostics from the daemon.\n"
@@ -3297,6 +3301,10 @@ msgstr "Accoppia dispositivi e sincronizza gli appunti sulla rete"
 #: src/gtk/tether-gtk.desktop.in
 msgid "iPhone;iOS;SMS;Messages;Clipboard;Files;Notifications;Calls;AirPods;"
 msgstr "iPhone;iOS;SMS;Messaggi;Appunti;File;Notifiche;Chiamate;AirPods;"
+
+#, c++-format
+#~ msgid " signal {0}/5 battery {1}/5"
+#~ msgstr " segnale {0}/5 batteria {1}/5"
 
 #~ msgid ""
 #~ "Where messages and contacts are stored on this computer. Encrypted keeps "

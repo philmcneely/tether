@@ -35,6 +35,7 @@ add_executable(tether_test
     test_service.cpp
     test_verbs.cpp
     ../src/ui_common/message_format.cpp
+    ../src/ui_common/ui_text.cpp
     ../src/tui/util.cpp
     ../src/cli/verbs.cpp
 )
