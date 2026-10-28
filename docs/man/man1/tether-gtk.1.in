@@ -4,7 +4,7 @@ tether-gtk \- Graphical interface for Tether
 .SH SYNOPSIS
 .B tether-gtk
 [\fB\-\-tray\fR]
-[\fB\-\-devices\fR | \fB\-\-messages\fR | \fB\-\-notifications\fR]
+[\fB\-\-devices\fR | \fB\-\-messages\fR | \fB\-\-notifications\fR | \fB\-\-contacts\fR | \fB\-\-calls\fR]
 [\fB\-\-thread\fR=\fIKEY\fR]
 .SH DESCRIPTION
 .B tether-gtk
@@ -27,9 +27,11 @@ start it automatically.
 Start without showing the window. The application is reachable only from its
 tray icon until \fBOpen Tether\fR is chosen.
 .TP
-.B \-\-devices\fR, \fB\-\-messages\fR, \fB\-\-notifications
+.B \-\-devices\fR, \fB\-\-messages\fR, \fB\-\-notifications\fR, \fB\-\-contacts\fR, \fB\-\-calls
 Open on that tab. When \fBtether-gtk\fR is already running the existing window
-is raised and switched instead of a second one being started.
+is raised and switched instead of a second one being started. Without one of
+these, the tab last open is restored. \fB\-\-calls\fR only applies while call
+control is enabled.
 .TP
 .B \-\-thread=\fIKEY\fR
 Open the messages tab on the conversation with this thread key, for example
@@ -47,6 +49,8 @@ selects the tray icon set:
 (default) is monochrome and recolored by the panel,
 .B color
 is the full-color application icon.
+.B last_view
+(string) is the tab restored on the next start.
 .SH SEE ALSO
 .BR tether (1),
 .BR tetherd (8)
