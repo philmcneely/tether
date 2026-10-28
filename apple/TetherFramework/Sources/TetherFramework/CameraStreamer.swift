@@ -21,11 +21,19 @@ public final class CameraStreamer: NSObject {
 
     // Feed for a preview layer; runs only while streaming.
     public let session = AVCaptureSession()
+    // The camera feeding `session`, for rotating a preview to match.
+    public private(set) var device: AVCaptureDevice?
 
     // Everything below is confined to `queue`.
     private let queue = DispatchQueue(label: "tether.camera")
     @ObservationIgnored private var connection: NWConnection?
     @ObservationIgnored private var encoder: VTCompressionSession?
+    // Turns frames upright and pillarboxes portrait ones into the encoder's landscape size.
+    @ObservationIgnored private var fitter: FrameFitter?
+    @ObservationIgnored private var rotation: AVCaptureDevice.RotationCoordinator?
+    @ObservationIgnored private var rotationObservation: NSKeyValueObservation?
+    // Clockwise degrees that turn the sensor's landscape frame upright.
+    @ObservationIgnored private var captureAngle: Double = 0
     // Frames handed to the encoder whose bytes the network has not taken yet.
     @ObservationIgnored private var pending = 0
 
@@ -92,10 +100,14 @@ public final class CameraStreamer: NSObject {
 
     private func teardown() {
         if session.isRunning { session.stopRunning() }
+        rotationObservation = nil
+        rotation = nil
         if let encoder {
             VTCompressionSessionInvalidate(encoder)
         }
         encoder = nil
+        fitter = nil
+        DispatchQueue.main.async { self.device = nil }
         connection?.stateUpdateHandler = nil
         connection?.cancel()
         connection = nil
@@ -132,12 +144,24 @@ public final class CameraStreamer: NSObject {
         output.alwaysDiscardsLateVideoFrames = true
         output.setSampleBufferDelegate(self, queue: queue)
         session.addOutput(output)
-        // Landscape whatever the phone's orientation, so the frame size never changes mid-stream.
+        // The sensor's own landscape, always. Rotating the connection while running
+        // rebuilds the capture graph, which stalls the feed and the UI; FrameFitter
+        // turns each frame upright instead.
         if let videoConnection = output.connection(with: .video), videoConnection.isVideoRotationAngleSupported(0) {
             videoConnection.videoRotationAngle = 0
         }
         session.commitConfiguration()
+
+        captureAngle = 0
+        let rotation = AVCaptureDevice.RotationCoordinator(device: device, previewLayer: nil)
+        rotationObservation = rotation.observe(\.videoRotationAngleForHorizonLevelCapture, options: [.initial, .new]) {
+            [weak self] coordinator, _ in
+            let angle = coordinator.videoRotationAngleForHorizonLevelCapture
+            self?.queue.async { self?.captureAngle = angle }
+        }
+        self.rotation = rotation
         session.startRunning()
+        DispatchQueue.main.async { self.device = device }
     }
 
     private func makeEncoder(width: Int32, height: Int32) -> VTCompressionSession? {
@@ -263,18 +287,21 @@ extension CameraStreamer: AVCaptureVideoDataOutputSampleBufferDelegate {
         guard pending < Self.maxPending else { return }
 
         if encoder == nil {
-            encoder = makeEncoder(width: Int32(CVPixelBufferGetWidth(image)),
-                                  height: Int32(CVPixelBufferGetHeight(image)))
+            // Always landscape, even when the stream starts in portrait.
+            let w = CVPixelBufferGetWidth(image), h = CVPixelBufferGetHeight(image)
+            fitter = FrameFitter(width: max(w, h), height: min(w, h))
+            encoder = makeEncoder(width: Int32(max(w, h)), height: Int32(min(w, h)))
         }
-        guard let encoder else {
+        guard let encoder, let fitter else {
             fail("H.264 encoder unavailable")
             return
         }
+        guard let fitted = fitter.fit(image, rotation: captureAngle) else { return }
 
         pending += 1
         let status = VTCompressionSessionEncodeFrame(
             encoder,
-            imageBuffer: image,
+            imageBuffer: fitted,
             presentationTimeStamp: CMSampleBufferGetPresentationTimeStamp(sampleBuffer),
             duration: .invalid,
             frameProperties: nil,
