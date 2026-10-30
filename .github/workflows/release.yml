@@ -86,7 +86,7 @@ jobs:
         run: |
           cd build/release && cpack -G ${{ matrix.generator }}
           . /etc/os-release
-          for f in *.deb; do [ -e "$f" ] && mv "$f" "${f%.deb}~${ID}${VERSION_ID}.deb"; done
+          for f in *.deb; do [ -e "$f" ] || continue; mv "$f" "${f%.deb}~${ID}${VERSION_ID}.deb"; done
 
       - uses: actions/upload-artifact@v4
         with:
