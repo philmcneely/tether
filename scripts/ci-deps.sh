@@ -33,7 +33,7 @@ case ${ID_LIKE:-$ID} in
             libwayland-dev libavahi-client-dev libssl-dev libglib2.0-dev libsecret-1-dev \
             libgtk-3-dev libgtk-layer-shell-dev libnotify-dev libncurses-dev \
             libavcodec-dev libpipewire-0.3-dev \
-            npm zip gettext
+            npm zip gettext dpkg-dev file
         ;;
     *)
         echo "ci-deps: unsupported distro: ${ID:-unknown}" >&2
