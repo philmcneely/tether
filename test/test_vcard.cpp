@@ -199,6 +199,15 @@ TEST(ContactStore, MatchesNationalAndE164FormsForDisplay) {
     EXPECT_EQ(store.name_for("tel:+15550000000"), "") << "an unknown number stays unlabelled";
 }
 
+TEST(ContactStore, MatchesTrunkPrefixNationalForm) {
+    ContactStore store;
+    store.set(parse_vcards("BEGIN:VCARD\nFN:Ada\nTEL:0412 345 678\nEND:VCARD\n"
+                           "BEGIN:VCARD\nFN:Grace\nTEL:+33 6 12 34 56 78\nEND:VCARD\n"));
+
+    EXPECT_EQ(store.name_for("tel:+61412345678"), "Ada");
+    EXPECT_EQ(store.name_for("tel:0612345678"), "Grace");
+}
+
 // Two people cannot be told apart by the fallback alone, and labelling a thread
 // with the wrong person's name is worse than labelling it with a number.
 TEST(ContactStore, RefusesToGuessWhenTwoContactsShareASuffix) {

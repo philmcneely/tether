@@ -592,6 +592,17 @@ TEST(MessageStore, NationalAndInternationalFormsShareAThread) {
     EXPECT_EQ(threads[0].key, "tel:+14255550123");
 }
 
+// Outside NANP the national form carries a trunk 0 the international one drops.
+TEST(MessageStore, TrunkPrefixNationalFormSharesAThread) {
+    MessageStore store;
+    store.add(make("a", "tel:+61412345678", 100));
+    store.add(make("b", "tel:0412345678", 200));
+
+    auto threads = store.threads();
+    ASSERT_EQ(threads.size(), 1u);
+    EXPECT_EQ(threads[0].key, "tel:+61412345678");
+}
+
 // The local echo is keyed on whatever spelling the UI held, the phone's copy on
 // the sent folder's. Different spellings must not keep them apart, or the reply
 // shows twice.

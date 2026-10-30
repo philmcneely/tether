@@ -277,7 +277,7 @@ namespace tether::bluetooth {
     }
 
     namespace {
-        constexpr size_t TEL_SUFFIX_DIGITS = 10;
+        constexpr size_t TEL_SUFFIX_DIGITS = 9;
     } // namespace
 
     std::string tel_suffix(const std::string& raw) {
