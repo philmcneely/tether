@@ -1248,7 +1248,7 @@ namespace tether::ui {
         gtk_text_view_set_bottom_margin(GTK_TEXT_VIEW(g_messages.composer), 6);
         gtk_widget_set_size_request(g_messages.composer, -1, 48);
         GtkWidget* composer_frame = gtk_scrolled_window_new(nullptr, nullptr);
-        gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(composer_frame), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+        gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(composer_frame), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
         // Without a border the box floats in the panel with nothing marking it as
         // somewhere to type.
         gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(composer_frame), GTK_SHADOW_NONE);
