@@ -14,14 +14,31 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # one deb per release only because of libavcodec soname
           # debian bookworm is out of reach (gcc 12).
           - image: ubuntu:24.04
             generator: DEB
-            name: deb
+            name: deb-ubuntu24.04
             runner: ubuntu-latest
           - image: ubuntu:24.04
             generator: DEB
-            name: deb-arm64
+            name: deb-ubuntu24.04-arm64
+            runner: ubuntu-24.04-arm
+          - image: ubuntu:26.04
+            generator: DEB
+            name: deb-ubuntu26.04
+            runner: ubuntu-latest
+          - image: ubuntu:26.04
+            generator: DEB
+            name: deb-ubuntu26.04-arm64
+            runner: ubuntu-24.04-arm
+          - image: debian:trixie
+            generator: DEB
+            name: deb-debian13
+            runner: ubuntu-latest
+          - image: debian:trixie
+            generator: DEB
+            name: deb-debian13-arm64
             runner: ubuntu-24.04-arm
           - image: fedora:latest
             generator: RPM
@@ -66,7 +83,10 @@ jobs:
         run: ctest --test-dir build/release --output-on-failure
 
       - name: package
-        run: cd build/release && cpack -G ${{ matrix.generator }}
+        run: |
+          cd build/release && cpack -G ${{ matrix.generator }}
+          . /etc/os-release
+          for f in *.deb; do [ -e "$f" ] && mv "$f" "${f%.deb}~${ID}${VERSION_ID}.deb"; done
 
       - uses: actions/upload-artifact@v4
         with:

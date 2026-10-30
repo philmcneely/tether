@@ -239,6 +239,8 @@ set(CPACK_DEBIAN_PACKAGE_MAINTAINER "zack@bartel.com")
 set(CPACK_DEBIAN_FILE_NAME DEB-DEFAULT)
 # alternates cover Ubuntu 24.04's t64 renames
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "libgtk-3-0 | libgtk-3-0t64, libgtk-layer-shell0, libnotify4, libncursesw6, libssl3 | libssl3t64, libwayland-client0, libavahi-client3, libglib2.0-0 | libglib2.0-0t64, bluez, bluez-obexd")
+# sonames (libavcodec60, libavcodec62, etc)
+set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 set(CPACK_DEBIAN_PACKAGE_SECTION "utils")
 set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://github.com/zackb/tether")
 

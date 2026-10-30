@@ -123,6 +123,15 @@ curl -fsSL "https://copr.fedorainfracloud.org/coprs/zackb/tether/repo/fedora-$(r
 rpm-ostree install tether
 ```
 
+### Debian / Ubuntu
+
+Download the `.deb` for your release (`~ubuntu24.04`, `~ubuntu26.04` or `~debian13`) from the
+[releases page](https://github.com/zackb/tether/releases), then:
+
+```bash
+sudo apt install ./tether_*.deb
+```
+
 ### AppImage
 
 One file, no install, for distros without a package and for immutable systems.
@@ -249,7 +258,7 @@ On Debian/Ubuntu:
 sudo apt install build-essential cmake ninja-build pkg-config git \
     libwayland-dev libavahi-client-dev libssl-dev libsecret-1-dev \
     libglib2.0-dev libgtk-3-dev libgtk-layer-shell-dev libnotify-dev \
-    libncurses-dev npm zip
+    libncurses-dev libavcodec-dev libpipewire-0.3-dev npm zip
 ```
 
 On Fedora:
